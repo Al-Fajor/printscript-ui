@@ -5,73 +5,116 @@ import {Rule} from "../types/Rule.ts";
 import {TestCase} from "../types/TestCase.ts";
 import {PaginatedUsers} from "./users.ts";
 import {TestCaseResult} from "./queries.tsx";
+import {SnippetAdapter} from "./snippetAdapter.ts";
+import axios from "axios";
 
 export class SnippetServiceOperations implements SnippetOperations {
-    createSnippet(createSnippet: CreateSnippet): Promise<Snippet> {
-        throw new Error("Method not implemented. Please implement createSnippet.");
+
+    async createSnippet(createSnippet: CreateSnippet): Promise<Snippet> {
+        const url = `${process.env.BACKEND_URL}/snippet`;
+        const adapter = new SnippetAdapter();
+        const formData = adapter.createSnippet(createSnippet);
+
+        try {
+            const response = await axios.post(url, formData, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                },
+            });
+
+            if (response.status !== 200) {
+                throw new Error(`Error: ${response.statusText}`);
+            }
+
+            return response.data;
+        } catch (error) {
+            console.error('Failed to create snippet:', error);
+            throw error;
+        }
+
     }
 
     deleteSnippet(id: string): Promise<string> {
-        throw new Error("Method not implemented. Please implement deleteSnippet.");
+        console.log('deleteSnippet called with id:', id);
+        return Promise.resolve('deleteSnippet not implemented');
     }
 
     formatSnippet(snippet: string): Promise<string> {
-        throw new Error("Method not implemented. Please implement formatSnippet.");
+        console.log('formatSnippet called with snippet:', snippet);
+        return Promise.resolve('formatSnippet not implemented');
     }
 
     getFileTypes(): Promise<FileType[]> {
-        throw new Error("Method not implemented. Please implement getFileTypes.");
+        const fileTypes: FileType[] = [
+            { language : 'Python', extension: 'py' },
+            {language: 'Printscript', extension: 'ps'},
+        ]
+        return Promise.resolve(fileTypes);
     }
 
     getFormatRules(): Promise<Rule[]> {
-        throw new Error("Method not implemented. Please implement getFormatRules.");
+        console.log('getFormatRules called');
+        return Promise.resolve([]);
     }
 
     getLintingRules(): Promise<Rule[]> {
-        throw new Error("Method not implemented. Please implement getLintingRules.");
+        console.log('getLintingRules called');
+        return Promise.resolve([]);
     }
 
     getSnippetById(id: string): Promise<Snippet | undefined> {
-        throw new Error("Method not implemented. Please implement getSnippetById.");
+        console.log('getSnippetById called with id:', id);
+        return Promise.resolve(undefined);
     }
 
     getTestCases(snippetId: string): Promise<TestCase[]> {
-        throw new Error("Method not implemented. Please implement getTestCases.");
+        console.log('getTestCases called with snippetId:', snippetId);
+        return Promise.resolve([]);
     }
 
     getUserFriends(name?: string, page?: number, pageSize?: number): Promise<PaginatedUsers> {
-        throw new Error("Method not implemented. Please implement getUserFriends.");
+        console.log('getUserFriends called with name:', name, 'page:', page, 'pageSize:', pageSize);
+        return Promise.resolve({users: [], total: 0});
     }
 
     listSnippetDescriptors(page: number, pageSize: number, sippetName?: string): Promise<PaginatedSnippets> {
-        throw new Error("Method not implemented. Please implement listSnippetDescriptors.");
+        console.log('listSnippetDescriptors called with page:', page, 'pageSize:', pageSize, 'sippetName:', sippetName);
+        return Promise.resolve({snippets: [], total: 0});
     }
 
     modifyFormatRule(newRules: Rule[]): Promise<Rule[]> {
-        throw new Error("Method not implemented. Please implement modifyFormatRule.");
+        console.log('modifyFormatRule called with newRules:', newRules);
+        return Promise.resolve([]);
     }
 
     modifyLintingRule(newRules: Rule[]): Promise<Rule[]> {
-        throw new Error("Method not implemented. Please implement modifyLintingRule.");
+        console.log('modifyLintingRule called with newRules:', newRules);
+        return Promise.resolve([]);
     }
 
     postTestCase(testCase: Partial<TestCase>): Promise<TestCase> {
-        throw new Error("Method not implemented. Please implement postTestCase.");
+        console.log('postTestCase called with testCase:', testCase);
+        return Promise.resolve({} as TestCase);
     }
 
     removeTestCase(id: string): Promise<string> {
-        throw new Error("Method not implemented. Please implement removeTestCase.");
+        console.log('removeTestCase called with id:', id);
+        return Promise.resolve('removeTestCase not implemented');
     }
 
     shareSnippet(snippetId: string, userId: string): Promise<Snippet> {
-        throw new Error("Method not implemented. Please implement shareSnippet.");
+        console.log('shareSnippet called with snippetId:', snippetId, 'userId:', userId);
+        return Promise.resolve({} as Snippet);
     }
 
     testSnippet(testCase: Partial<TestCase>): Promise<TestCaseResult> {
-        throw new Error("Method not implemented. Please implement testSnippet.");
+        console.log('testSnippet called with testCase:', testCase);
+        return Promise.resolve({} as TestCaseResult);
     }
 
     updateSnippetById(id: string, updateSnippet: UpdateSnippet): Promise<Snippet> {
-        throw new Error("Method not implemented. Please implement updateSnippetById.");
+        console.log('updateSnippetById called with id:', id, 'updateSnippet:', updateSnippet);
+        return Promise.resolve({} as Snippet);
     }
+
 }
