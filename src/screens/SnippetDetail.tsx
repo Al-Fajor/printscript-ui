@@ -11,7 +11,7 @@ import {
 } from "../utils/queries.tsx";
 import {useFormatSnippet, useGetSnippetById, useShareSnippet} from "../utils/queries.tsx";
 import {Bòx} from "../components/snippet-table/SnippetBox.tsx";
-import {BugReport, Delete, Download, PlayArrow, Save, Share, StopRounded} from "@mui/icons-material";
+import {BugReport, Delete, Download, Save, Share} from "@mui/icons-material";
 import {ShareSnippetModal} from "../components/snippet-detail/ShareSnippetModal.tsx";
 import {TestSnippetModal} from "../components/snippet-test/TestSnippetModal.tsx";
 import {Snippet} from "../utils/snippet.ts";
@@ -56,7 +56,6 @@ export const SnippetDetail = (props: SnippetDetailProps) => {
   const [shareModalOppened, setShareModalOppened] = useState(false)
   const [deleteConfirmationModalOpen, setDeleteConfirmationModalOpen] = useState(false)
   const [testModalOpened, setTestModalOpened] = useState(false);
-  const [runSnippet, setRunSnippet] = useState(false);
 
   const {data: snippet, isLoading} = useGetSnippetById(id);
   const {mutate: shareSnippet, isLoading: loadingShare} = useShareSnippet()
@@ -103,11 +102,12 @@ export const SnippetDetail = (props: SnippetDetailProps) => {
                 </IconButton>
               </Tooltip>
               <DownloadButton snippet={snippet}/>
-              <Tooltip title={runSnippet ? "Stop run" : "Run"}>
-                <IconButton onClick={() => setRunSnippet(!runSnippet)}>
-                  {runSnippet ? <StopRounded/> : <PlayArrow/>}
-                </IconButton>
-              </Tooltip>
+              {/*<Tooltip title={runSnippet ? "Stop run" : "Run"}>*/}
+              {/*  <IconButton onClick={() => setRunSnippet(!runSnippet)}>*/}
+              {/*    {runSnippet ? <StopRounded/> : <PlayArrow/>}*/}
+              {/*  </IconButton>*/}
+              {/*</Tooltip>*/}
+              {/* TODO: we can implement a live mode*/}
               <Tooltip title={"Format"}>
                 <IconButton onClick={() => formatSnippet(code)} disabled={isFormatLoading}>
                   <ReadMoreIcon />
