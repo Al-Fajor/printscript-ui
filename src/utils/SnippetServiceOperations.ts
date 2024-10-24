@@ -34,9 +34,21 @@ export class SnippetServiceOperations implements SnippetOperations {
 
     }
 
-    deleteSnippet(id: string): Promise<string> {
+    async deleteSnippet(id: string): Promise<string> {
         console.log('deleteSnippet called with id:', id);
-        return Promise.resolve('deleteSnippet not implemented');
+        const url = `${process.env.BACKEND_URL}/snippet/${id}`;
+        try {
+            await axios.delete(url,{
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                }
+            })
+            console.log('Snippet deleted successfully');
+            return 'Snippet deleted successfully';
+        } catch (error) {
+            console.error('Failed to delete snippet:', error);
+            throw error;
+        }
     }
 
     formatSnippet(snippet: string): Promise<string> {
@@ -62,9 +74,33 @@ export class SnippetServiceOperations implements SnippetOperations {
         return Promise.resolve([]);
     }
 
-    getSnippetById(id: string): Promise<Snippet | undefined> {
+    async getSnippetById(id: string): Promise<Snippet | undefined> {
         console.log('getSnippetById called with id:', id);
-        return Promise.resolve(undefined);
+        const url = `${process.env.BACKEND_URL}/snippet/${id}`;
+        try {
+            const response = await axios.get(url, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                }
+            });
+
+            if (!response?.data) {
+                throw new Error('Snippet not found');
+            }
+
+            return {
+                id: response.data.id,
+                name: response.data.name,
+                content: response.data.content,
+                language: response.data.language,
+                extension: response.data.extension,
+                compliance: response.data.compliance,
+                author: response.data.author
+            };
+        } catch (error) {
+            console.log('Failed to get snippet:', error);
+            return Promise.resolve(undefined);
+        }
     }
 
     getTestCases(snippetId: string): Promise<TestCase[]> {
