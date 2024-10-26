@@ -7,6 +7,8 @@ import {PaginatedUsers} from "./users.ts";
 import {TestCaseResult} from "./queries.tsx";
 import {SnippetAdapter} from "./snippetAdapter.ts";
 import axios from "axios";
+import {Simulate} from "react-dom/test-utils";
+import error = Simulate.error;
 
 export class SnippetServiceOperations implements SnippetOperations {
 
@@ -127,15 +129,45 @@ export class SnippetServiceOperations implements SnippetOperations {
         console.log('modifyLintingRule called with newRules:', newRules);
         return Promise.resolve([]);
     }
-
-    postTestCase(testCase: Partial<TestCase>): Promise<TestCase> {
+    async postTestCase(testCase: Partial<TestCase>): Promise<TestCase> {
         console.log('postTestCase called with testCase:', testCase);
-        return Promise.resolve({} as TestCase);
+        const emptyTestCase = Promise.resolve({} as TestCase)
+
+        const url = `${process.env.BACKEND_URL}/snippet/${testCase.id}/test`;
+        try {
+            const response = await axios.post(url, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            })
+
+            if (response.status === 500) return emptyTestCase
+
+            const body: {snippetId: string, name: string, input?: [], output?: []} = response.data.body
+
+            return Promise.resolve(
+                {
+                    id: body.snippetId,
+                    name: body.name,
+                    input: body.input,
+                    output: body.output
+                } as TestCase
+            )
+
+        } catch (err) {return emptyTestCase}
     }
 
-    removeTestCase(id: string): Promise<string> {
+    async removeTestCase(id: string): Promise<string> {
         console.log('removeTestCase called with id:', id);
-        return Promise.resolve('removeTestCase not implemented');
+        const url = `${process.env.BACKEND_URL}/snippet/test/${id}`;
+        const response = await axios.delete(url, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        })
+        // This endpoint MUST return a string in its body, independently if the test exists
+        return Promise.resolve(response.data.body)
+
     }
 
     shareSnippet(snippetId: string, userId: string): Promise<Snippet> {
@@ -152,5 +184,4 @@ export class SnippetServiceOperations implements SnippetOperations {
         console.log('updateSnippetById called with id:', id, 'updateSnippet:', updateSnippet);
         return Promise.resolve({} as Snippet);
     }
-
 }
