@@ -129,7 +129,6 @@ export class SnippetServiceOperations implements SnippetOperations {
         console.log('modifyLintingRule called with newRules:', newRules);
         return Promise.resolve([]);
     }
-
     async postTestCase(testCase: Partial<TestCase>): Promise<TestCase> {
         console.log('postTestCase called with testCase:', testCase);
         const emptyTestCase = Promise.resolve({} as TestCase)
@@ -185,5 +184,4 @@ export class SnippetServiceOperations implements SnippetOperations {
         console.log('updateSnippetById called with id:', id, 'updateSnippet:', updateSnippet);
         return Promise.resolve({} as Snippet);
     }
-
 }
