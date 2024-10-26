@@ -160,7 +160,7 @@ export class SnippetServiceOperations implements SnippetOperations {
 
     async removeTestCase(id: string): Promise<string> {
         console.log('removeTestCase called with id:', id);
-        const url = `${process.env.BACKEND_URL}/snippet/${id}/test`;
+        const url = `${process.env.BACKEND_URL}/snippet/test/${id}`;
         const response = await axios.delete(url, {
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
