@@ -21,11 +21,6 @@ export class SnippetServiceOperations implements SnippetOperations {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`,
                 },
             });
-
-            if (response.status !== 200) {
-                throw new Error(`Error: ${response.statusText}`);
-            }
-
             return response.data;
         } catch (error) {
             console.error('Failed to create snippet:', error);
