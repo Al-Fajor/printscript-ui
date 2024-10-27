@@ -7,8 +7,6 @@ import {PaginatedUsers} from "./users.ts";
 import {TestCaseResult} from "./queries.tsx";
 import {SnippetAdapter} from "./snippetAdapter.ts";
 import axios from "axios";
-import {Simulate} from "react-dom/test-utils";
-import error = Simulate.error;
 
 export class SnippetServiceOperations implements SnippetOperations {
 
@@ -112,12 +110,14 @@ export class SnippetServiceOperations implements SnippetOperations {
 
     getUserFriends(name?: string, page?: number, pageSize?: number): Promise<PaginatedUsers> {
         console.log('getUserFriends called with name:', name, 'page:', page, 'pageSize:', pageSize);
-        return Promise.resolve({users: [], total: 0});
+        const users: PaginatedUsers = {users: [], page: 0, count: 0, page_size: 0};
+        return Promise.resolve(users);
     }
 
     listSnippetDescriptors(page: number, pageSize: number, sippetName?: string): Promise<PaginatedSnippets> {
         console.log('listSnippetDescriptors called with page:', page, 'pageSize:', pageSize, 'sippetName:', sippetName);
-        return Promise.resolve({snippets: [], total: 0});
+        const snippets: PaginatedSnippets = {snippets: [], page: 0, count: 0, page_size: 0};
+        return Promise.resolve(snippets);
     }
 
     modifyFormatRule(newRules: Rule[]): Promise<Rule[]> {
