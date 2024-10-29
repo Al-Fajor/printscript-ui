@@ -10,6 +10,8 @@ import axios from "axios";
 
 export class SnippetServiceOperations implements SnippetOperations {
 
+    token = localStorage.getItem("token")
+
     async createSnippet(createSnippet: CreateSnippet): Promise<Snippet> {
         const url = `${process.env.BACKEND_URL}/snippet`;
         const adapter = new SnippetAdapter();
@@ -18,7 +20,7 @@ export class SnippetServiceOperations implements SnippetOperations {
         try {
             const response = await axios.post(url, formData, {
                 headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    'Authorization': `Bearer ${this.token}`,
                 },
             });
             return response.data;
@@ -35,7 +37,7 @@ export class SnippetServiceOperations implements SnippetOperations {
         try {
             await axios.delete(url,{
                 headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    'Authorization': `Bearer ${this.token}`,
                 }
             })
             console.log('Snippet deleted successfully');
@@ -52,9 +54,14 @@ export class SnippetServiceOperations implements SnippetOperations {
     }
 
     getFileTypes(): Promise<FileType[]> {
+        // Extend this for all languages we're going to support
         const fileTypes: FileType[] = [
             { language : 'Python', extension: 'py' },
-            {language: 'Printscript', extension: 'ps'},
+            { language: 'Printscript', extension: 'ps' },
+            { language: 'Go', extension: 'go' },
+            { language: 'Java', extension: 'java' },
+            { language: 'JavaScript', extension: 'js' },
+            { language: 'TypeScript', extension: 'ts' },
         ]
         return Promise.resolve(fileTypes);
     }
@@ -75,7 +82,7 @@ export class SnippetServiceOperations implements SnippetOperations {
         try {
             const response = await axios.get(url, {
                 headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    'Authorization': `Bearer ${this.token}`,
                 }
             });
 
@@ -103,15 +110,50 @@ export class SnippetServiceOperations implements SnippetOperations {
         return Promise.resolve([]);
     }
 
-    getUserFriends(name?: string, page?: number, pageSize?: number): Promise<PaginatedUsers> {
+    async getUserFriends(name?: string, page?: number, pageSize?: number): Promise<PaginatedUsers> {
         console.log('getUserFriends called with name:', name, 'page:', page, 'pageSize:', pageSize);
-        const users: PaginatedUsers = {users: [], page: 0, count: 0, page_size: 0};
+        // Only need to send userId and name
+        const response= await axios.get(`${process.env.BACKEND_URL}/users`, {
+            headers: {
+                Authorization: `Bearer ${this.token}`
+            }
+        })
+
+        const usersFromBackend: never[] = response.data
+
+
+        const users: PaginatedUsers = {users: usersFromBackend, page: 0, count: 0, page_size: 0};
         return Promise.resolve(users);
     }
 
-    listSnippetDescriptors(page: number, pageSize: number, sippetName?: string): Promise<PaginatedSnippets> {
-        console.log('listSnippetDescriptors called with page:', page, 'pageSize:', pageSize, 'sippetName:', sippetName);
-        const snippets: PaginatedSnippets = {snippets: [], page: 0, count: 0, page_size: 0};
+    async listSnippetDescriptors(page: number, pageSize: number, snippetName?: string): Promise<PaginatedSnippets> {
+        console.log('listSnippetDescriptors called with page:', page, 'pageSize:', pageSize, 'snippetName:', snippetName);
+        const response= await axios.get(`${process.env.BACKEND_URL}/user/snippets`, {
+            params: {
+                isOwner: true,
+                isShared: false,
+            },
+            headers: {
+                Authorization: `Bearer ${this.token}`
+            }
+        })
+
+        function transformToSnippet(snippetJson): Snippet {
+            // TODO
+            return {
+                id: snippetJson.id, // All of these attributes are hardcoded due to further development needed
+                name: snippetJson.name,
+                content: snippetJson.content,
+                language: snippetJson.language,
+                extension: "PrintScript", // All of these attributes are hardcoded due to further development needed
+                compliance: "compliant", // All of these attributes are hardcoded due to further development needed
+                author: "Hardcoded Author"  // All of these attributes are hardcoded due to further development needed
+            } as Snippet
+        }
+
+        const snippetArray: Snippet[] = response.data.map(resItem => transformToSnippet(resItem))
+
+        const snippets: PaginatedSnippets = {snippets: snippetArray , page: 0, count: 0, page_size: 0}; // TODO: paginate
         return Promise.resolve(snippets);
     }
 
@@ -132,7 +174,7 @@ export class SnippetServiceOperations implements SnippetOperations {
         try {
             const response = await axios.post(url, {
                 headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    'Authorization': `Bearer ${this.token}`
                 }
             })
 
@@ -157,7 +199,7 @@ export class SnippetServiceOperations implements SnippetOperations {
         const url = `${process.env.BACKEND_URL}/snippet/test/${id}`;
         const response = await axios.delete(url, {
             headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
+                'Authorization': `Bearer ${this.token}`
             }
         })
         // This endpoint MUST return a string in its body, independently if the test exists
