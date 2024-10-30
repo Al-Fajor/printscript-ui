@@ -20,16 +20,20 @@ const HomeScreen = () => {
 
   useEffect(() => {
       const renderInitial = async() =>{
-          const token = await getAccessTokenSilently({
-              authorizationParams:{
-                  redirect_uri: window.location.origin,
-                      audience: import.meta.env.VITE_AUTH0_AUDIENCE,
-                      scope: "read:snippets write:snippets"
-              }
-          }
-          );
+          const token = async() => {
+              const response = await getAccessTokenSilently({
+                      authorizationParams: {
+                          redirect_uri: window.location.origin,
+                          audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+                          scope: "read:snippets write:snippets"
+                      }
+                  }
+              );
 
-          localStorage.setItem("token", token)
+              localStorage.setItem("token", response)
+          }
+
+          await token()
 
           if (data?.count && data.count != count) {
               handleChangeCount(data.count)
