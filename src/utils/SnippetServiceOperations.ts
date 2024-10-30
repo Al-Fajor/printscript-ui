@@ -144,19 +144,19 @@ export class SnippetServiceOperations implements SnippetOperations {
         function transformToSnippet(snippetJson): Snippet {
             // TODO
             return {
-                id: snippetJson.id, // All of these attributes are hardcoded due to further development needed
+                id: snippetJson.id,
                 name: snippetJson.name,
                 content: snippetJson.content,
                 language: snippetJson.language,
                 extension: "PrintScript", // All of these attributes are hardcoded due to further development needed
-                compliance: snippetJson.compliance, // All of these attributes are hardcoded due to further development needed
-                author: snippetJson.author  // All of these attributes are hardcoded due to further development needed
+                compliance: snippetJson.compliance,
+                author: snippetJson.author
             } as Snippet
         }
 
-        const snippetArray: Snippet[] = response.data.map(resItem => transformToSnippet(resItem))
+        const snippetArray: Snippet[] = response.data.snippets.map(resItem => transformToSnippet(resItem))
 
-        const snippets: PaginatedSnippets = {snippets: snippetArray , page: 0, count: 0, page_size: 0}; // TODO: paginate
+        const snippets: PaginatedSnippets = {snippets: snippetArray , page, count: response.data.count, page_size: pageSize};
         return Promise.resolve(snippets);
     }
 
