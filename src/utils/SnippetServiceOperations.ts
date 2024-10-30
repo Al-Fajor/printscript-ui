@@ -140,6 +140,7 @@ export class SnippetServiceOperations implements SnippetOperations {
                 Authorization: `Bearer ${this.token}`
             }
         })
+        console.log(response)
 
         function transformToSnippet(snippetJson): Snippet {
             // TODO
@@ -156,7 +157,7 @@ export class SnippetServiceOperations implements SnippetOperations {
 
         const snippetArray: Snippet[] = response.data.snippets.map(resItem => transformToSnippet(resItem))
 
-        const snippets: PaginatedSnippets = {snippets: snippetArray , page, count: response.data.count, page_size: pageSize};
+        const snippets: PaginatedSnippets = {snippets: snippetArray , page: response.data.page, count: response.data.count, page_size: response.data.pageSize}
         return Promise.resolve(snippets);
     }
 
