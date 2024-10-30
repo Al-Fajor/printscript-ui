@@ -132,6 +132,9 @@ export class SnippetServiceOperations implements SnippetOperations {
             params: {
                 isOwner: true,
                 isShared: false,
+                name: snippetName,
+                pageNumber: page,
+                pageSize
             },
             headers: {
                 Authorization: `Bearer ${this.token}`
@@ -146,8 +149,8 @@ export class SnippetServiceOperations implements SnippetOperations {
                 content: snippetJson.content,
                 language: snippetJson.language,
                 extension: "PrintScript", // All of these attributes are hardcoded due to further development needed
-                compliance: "compliant", // All of these attributes are hardcoded due to further development needed
-                author: "Hardcoded Author"  // All of these attributes are hardcoded due to further development needed
+                compliance: snippetJson.compliance, // All of these attributes are hardcoded due to further development needed
+                author: snippetJson.author  // All of these attributes are hardcoded due to further development needed
             } as Snippet
         }
 
