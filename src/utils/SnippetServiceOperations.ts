@@ -105,9 +105,28 @@ export class SnippetServiceOperations implements SnippetOperations {
         }
     }
 
-    getTestCases(snippetId: string): Promise<TestCase[]> {
-        console.log('getTestCases called with snippetId:', snippetId);
-        return Promise.resolve([]);
+    async getTestCases(snippetId: string): Promise<TestCase[]> {
+        const response = await axios.get(`${process.env.BACKEND_URL}/snippet/${snippetId}/test/all`, {
+            headers: {
+                Authorization: `Bearer ${this.token}`
+            }
+        })
+
+        const testCases: TestCase[] = response.data.map((testCase: {
+            id: never;
+            name: never;
+            input: never;
+            output: never;
+        }) => {
+            return {
+                id: testCase.id,
+                name: testCase.name,
+                input: testCase.input,
+                output: testCase.output
+            }
+        })
+        console.log(response)
+        return Promise.resolve(testCases);
     }
 
     async getUserFriends(name?: string, page?: number, pageSize?: number): Promise<PaginatedUsers> {
