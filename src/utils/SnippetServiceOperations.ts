@@ -189,11 +189,11 @@ export class SnippetServiceOperations implements SnippetOperations {
         console.log('modifyLintingRule called with newRules:', newRules);
         return Promise.resolve([]);
     }
-    async postTestCase(testCase: Partial<TestCase>): Promise<TestCase> {
+    async postTestCase(testCase: Partial<TestCase>, snippetId: string): Promise<TestCase> {
         console.log('postTestCase called with testCase:', testCase);
         const emptyTestCase = Promise.resolve({} as TestCase)
 
-        const url = `${process.env.BACKEND_URL}/snippet/${testCase.id}/test`;
+        const url = `${process.env.BACKEND_URL}/snippet/${snippetId}/test`;
         try {
             const response = await axios.post(url,{
                 inputs: testCase.input,
