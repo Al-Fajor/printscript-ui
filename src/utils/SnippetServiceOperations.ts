@@ -161,7 +161,7 @@ export class SnippetServiceOperations implements SnippetOperations {
         })
         console.log(response)
 
-        function transformToSnippet(snippetJson): Snippet {
+        function transformToSnippet(snippetJson: { id: never; name: never; content: never; language: never; compliance: never; author: never; }): Snippet {
             // TODO
             return {
                 id: snippetJson.id,
@@ -174,7 +174,7 @@ export class SnippetServiceOperations implements SnippetOperations {
             } as Snippet
         }
 
-        const snippetArray: Snippet[] = response.data.snippets.map(resItem => transformToSnippet(resItem))
+        const snippetArray: Snippet[] = response.data.snippets.map((resItem: { id: never; name: never; content: never; language: never; compliance: never; author: never; }) => transformToSnippet(resItem))
 
         const snippets: PaginatedSnippets = {snippets: snippetArray , page: response.data.page, count: response.data.count, page_size: response.data.pageSize}
         return Promise.resolve(snippets);
