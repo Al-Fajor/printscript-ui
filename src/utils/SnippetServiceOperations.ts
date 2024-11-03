@@ -115,14 +115,14 @@ export class SnippetServiceOperations implements SnippetOperations {
         const testCases: TestCase[] = response.data.map((testCase: {
             id: never;
             name: never;
-            input: never;
-            output: never;
+            inputs: never;
+            expectedOutput: never;
         }) => {
             return {
                 id: testCase.id,
                 name: testCase.name,
-                input: testCase.input,
-                output: testCase.output
+                input: testCase.inputs,
+                output: testCase.expectedOutput
             }
         })
         console.log(response)
@@ -198,7 +198,8 @@ export class SnippetServiceOperations implements SnippetOperations {
             const response = await axios.post(url,{
                 inputs: testCase.input,
                 expectedOutput: testCase.output,
-                version: "1.1"
+                version: "1.1",
+                name: testCase.name
             },{
                 headers: {
                     'Authorization': `Bearer ${this.token}`
@@ -207,14 +208,14 @@ export class SnippetServiceOperations implements SnippetOperations {
 
             if (response.status === 500) return emptyTestCase
 
-            const body: {snippetId: string, name: string, input?: [], output?: []} = response.data.body
+            const body: {snippetId: string, name: string, inputs?: [], expectedOutput?: []} = response.data.body
 
             return Promise.resolve(
                 {
                     id: body.snippetId,
                     name: body.name,
-                    input: body.input,
-                    output: body.output
+                    input: body.inputs,
+                    output: body.expectedOutput
                 } as TestCase
             )
 
