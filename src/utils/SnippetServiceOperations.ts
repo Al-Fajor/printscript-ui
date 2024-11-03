@@ -195,7 +195,11 @@ export class SnippetServiceOperations implements SnippetOperations {
 
         const url = `${process.env.BACKEND_URL}/snippet/${testCase.id}/test`;
         try {
-            const response = await axios.post(url, {
+            const response = await axios.post(url,{
+                inputs: testCase.input,
+                expectedOutput: testCase.output,
+                version: "1.1"
+            },{
                 headers: {
                     'Authorization': `Bearer ${this.token}`
                 }
