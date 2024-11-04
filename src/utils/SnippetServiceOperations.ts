@@ -50,9 +50,29 @@ export class SnippetServiceOperations implements SnippetOperations {
         }
     }
 
-    formatSnippet(snippet: string): Promise<string> {
+    async formatSnippet(snippet: string): Promise<string> {
         console.log('formatSnippet called with snippet:', snippet);
-        return Promise.resolve('formatSnippet not implemented');
+
+        const url = `${BACKEND_URL}/action/format`;
+
+        try {
+            const response = await axios.post(url, null, {
+                headers: { 'Authorization': `Bearer ${this.token}` },
+                params: {
+                    file: snippet,
+                    language: 'Printscript',
+                    version: '1.1'
+                }
+            })
+
+            if (!response?.data) {
+                throw new Error('Could not format snippet');
+            }
+            return response.data
+        } catch (error) {
+            console.log('Failed to format snippet:', error);
+            return Promise.resolve(snippet);
+        }
     }
 
     getFileTypes(): Promise<FileType[]> {
