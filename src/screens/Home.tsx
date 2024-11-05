@@ -17,31 +17,27 @@ const HomeScreen = () => {
   const {page, page_size, count, handleChangeCount} = usePaginationContext()
   const {data, isLoading} = useGetSnippets(page, page_size, snippetName)
     const {getAccessTokenSilently} = useAuth0();
+  const [token, setToken] = useState("")
 
   useEffect(() => {
-      const renderInitial = async() =>{
-          const token = async() => {
-              const response = await getAccessTokenSilently({
-                      authorizationParams: {
-                          redirect_uri: window.location.origin,
-                          audience: import.meta.env.VITE_AUTH0_AUDIENCE,
-                          scope: "read:snippets write:snippets"
-                      }
-                  }
-              );
-
-              localStorage.setItem("token", response)
-          }
-
-          await token()
-
-          if (data?.count && data.count != count) {
-              handleChangeCount(data.count)
-          }
+      const getToken = async() => {
+          const response = await getAccessTokenSilently({
+              authorizationParams: {
+                  redirect_uri: window.location.origin,
+                  audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+                  scope: "read:snippets write:snippets"
+              }
+          })
+          setToken(response)
       }
 
-      renderInitial()
-  }, [getAccessTokenSilently,count, data?.count, handleChangeCount]);
+      if (data?.count && data.count != count) {
+          handleChangeCount(data.count)
+      }
+
+      getToken().then(()=>localStorage.setItem("token", token))
+
+  }, [token, count, data?.count, handleChangeCount, getAccessTokenSilently]);
 
 
   useEffect(() => {

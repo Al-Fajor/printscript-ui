@@ -126,6 +126,12 @@ export class SnippetServiceOperations implements SnippetOperations {
     async getSnippetById(id: string): Promise<Snippet | undefined> {
         console.log('getSnippetById called with id:', id);
         const url = `${process.env.BACKEND_URL}/snippet/${id}`;
+
+        const getExtension = async (language: string): Promise<string> => {
+            const fileTypes = await this.getFileTypes()
+            return fileTypes.filter(fileType => fileType.language === language)[0].extension
+        }
+
         try {
             const response = await axios.get(url, {
                 headers: {
@@ -142,7 +148,7 @@ export class SnippetServiceOperations implements SnippetOperations {
                 name: response.data.name,
                 content: response.data.content,
                 language: response.data.language,
-                extension: response.data.extension,
+                extension: await getExtension(response.data.language),
                 compliance: response.data.compliance,
                 author: response.data.author
             };
@@ -172,14 +178,13 @@ export class SnippetServiceOperations implements SnippetOperations {
                 output: testCase.expectedOutput
             }
         })
-        console.log(response)
         return Promise.resolve(testCases);
     }
 
     async getUserFriends(name?: string, page?: number, pageSize?: number): Promise<PaginatedUsers> {
         console.log('getUserFriends called with name:', name, 'page:', page, 'pageSize:', pageSize);
         // Only need to send userId and name
-        const response= await axios.get(`${process.env.BACKEND_URL}/users`, {
+        const response= await axios.get(`${process.env.BACKEND_URL}/user-data/users`, {
             headers: {
                 Authorization: `Bearer ${this.token}`
             }
@@ -303,18 +308,66 @@ export class SnippetServiceOperations implements SnippetOperations {
 
     }
 
-    shareSnippet(snippetId: string, userId: string): Promise<Snippet> {
+    async shareSnippet(snippetId: string, userId: string): Promise<Snippet> {
         console.log('shareSnippet called with snippetId:', snippetId, 'userId:', userId);
-        return Promise.resolve({} as Snippet);
+        const url = `${process.env.BACKEND_URL}/snippet/${snippetId}/share`;
+        // Create permission, share to this user
+        await axios.post(url,
+            {userId},{
+            headers: {
+                'Authorization': `Bearer ${this.token}`
+            }
+        })
+
+        return this.getSnippetById(snippetId) as Promise<Snippet>;
     }
 
-    testSnippet(testCase: Partial<TestCase>): Promise<TestCaseResult> {
+    async testSnippet(testCase: Partial<TestCase>): Promise<TestCaseResult> {
         console.log('testSnippet called with testCase:', testCase);
-        return Promise.resolve({} as TestCaseResult);
+        const url = `${process.env.BACKEND_URL}/snippet/${testCase.id}/test`
+        // @ts-expect-error
+        const testResult = await axios.get(url, testCase, {
+            headers:{
+                'Authorization': `Bearer ${this.token}`
+            }
+        });
+        let testCaseResult: TestCaseResult;
+
+        switch (testResult.data) {
+            case 'SUCCESS':
+                testCaseResult = 'success';
+                break;
+            case 'FAILURE':
+                testCaseResult = 'fail';
+                break;
+            default:
+                testCaseResult = 'fail';
+        }
+
+        return Promise.resolve(testCaseResult);
     }
 
-    updateSnippetById(id: string, updateSnippet: UpdateSnippet): Promise<Snippet> {
+    async updateSnippetById(id: string, updateSnippet: UpdateSnippet): Promise<Snippet> {
         console.log('updateSnippetById called with id:', id, 'updateSnippet:', updateSnippet);
-        return Promise.resolve({} as Snippet);
+
+        const url = `${process.env.BACKEND_URL}/snippet/${id}`;
+        const snippet = await this.getSnippetById(id)
+        if (!snippet) return Promise.resolve({} as Snippet)
+        // TODO: fix backend endpoints
+        try {
+            const response = await axios.put(url, {
+                    id,
+                    language: snippet.language,
+                    content: updateSnippet.content
+            }, {
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                },
+            });
+            return response.data;
+        } catch (error) {
+            console.error('Failed to create snippet:', error);
+            return Promise.resolve({} as Snippet);
+        }
     }
 }
