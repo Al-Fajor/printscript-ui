@@ -324,27 +324,30 @@ export class SnippetServiceOperations implements SnippetOperations {
 
     async testSnippet(testCase: Partial<TestCase>): Promise<TestCaseResult> {
         console.log('testSnippet called with testCase:', testCase);
-        const url = `${process.env.BACKEND_URL}/snippet/${testCase.id}/test`
-        // @ts-expect-error
-        const testResult = await axios.get(url, testCase, {
-            headers:{
-                'Authorization': `Bearer ${this.token}`
+        try {
+            const url = `${process.env.BACKEND_URL}/snippet/test/${testCase.id}`
+            const testResult = await axios.get(url, {
+                headers:{
+                    'Authorization': `Bearer ${this.token}`
+                }
+            });
+            let testCaseResult: TestCaseResult;
+
+            switch (testResult.data) {
+                case 'SUCCESS':
+                    testCaseResult = 'success';
+                    break;
+                case 'FAILURE':
+                    testCaseResult = 'fail';
+                    break;
+                default:
+                    testCaseResult = 'fail';
             }
-        });
-        let testCaseResult: TestCaseResult;
 
-        switch (testResult.data) {
-            case 'SUCCESS':
-                testCaseResult = 'success';
-                break;
-            case 'FAILURE':
-                testCaseResult = 'fail';
-                break;
-            default:
-                testCaseResult = 'fail';
+            return Promise.resolve(testCaseResult);
+        } catch (err) {
+            return Promise.resolve('fail' as TestCaseResult)
         }
-
-        return Promise.resolve(testCaseResult);
     }
 
     async updateSnippetById(id: string, updateSnippet: UpdateSnippet): Promise<Snippet> {
