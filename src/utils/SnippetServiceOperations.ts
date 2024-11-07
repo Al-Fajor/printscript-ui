@@ -265,27 +265,41 @@ export class SnippetServiceOperations implements SnippetOperations {
     async postTestCase(testCase: Partial<TestCase>, snippetId: string): Promise<TestCase> {
         console.log('postTestCase called with testCase:', testCase);
         const emptyTestCase = Promise.resolve({} as TestCase)
-
-        const url = `${process.env.BACKEND_URL}/snippet/${snippetId}/test`;
+         //This only saves the test, we need the update case
+        const url = `${process.env.BACKEND_URL}/snippet/test/`;
+        let response;
         try {
-            const response = await axios.post(url,{
-                inputs: testCase.input,
-                expectedOutput: testCase.output,
-                version: "1.1",
-                name: testCase.name
-            },{
-                headers: {
-                    'Authorization': `Bearer ${this.token}`
-                }
-            })
+            if (!testCase.id) {
+                response = await axios.post(url + snippetId, {
+                    inputs: testCase.input,
+                    expectedOutput: testCase.output,
+                    name: testCase.name
+                }, {
+                    headers: {
+                        'Authorization': `Bearer ${this.token}`
+                    }
+                })
 
-            if (response.status === 500) return emptyTestCase
-
-            const body: {snippetId: string, name: string, inputs?: [], expectedOutput?: []} = response.data.body
+                if (response.status === 500) return emptyTestCase
+            }
+            else {
+                //This is the update case
+                response = await axios.put(url + testCase.id, {
+                    id: testCase.id,
+                    inputs: testCase.input,
+                    expectedOutput: testCase.output,
+                    name: testCase.name
+                }, {
+                    headers: {
+                        'Authorization': `Bearer ${this.token}`
+                    }
+                })
+            }
+            const body: {id: string, name: string, inputs?: [], expectedOutput?: []} = response.data.body
 
             return Promise.resolve(
                 {
-                    id: body.snippetId,
+                    id: body.id,
                     name: body.name,
                     input: body.inputs,
                     output: body.expectedOutput
@@ -325,12 +339,18 @@ export class SnippetServiceOperations implements SnippetOperations {
     async testSnippet(testCase: Partial<TestCase>): Promise<TestCaseResult> {
         console.log('testSnippet called with testCase:', testCase);
         try {
-            const url = `${process.env.BACKEND_URL}/snippet/test/${testCase.id}`
+            const url = `${process.env.BACKEND_URL}/snippet/test/${testCase.id!}/get-results`;
             const testResult = await axios.get(url, {
-                headers:{
+                headers: {
                     'Authorization': `Bearer ${this.token}`
                 }
             });
+
+            if (!testResult || !testResult.data) {
+                throw new Error('Empty response from server');
+            }
+
+            console.log(`Test result: ${testResult.data}`);
             let testCaseResult: TestCaseResult;
 
             switch (testResult.data) {
@@ -346,7 +366,8 @@ export class SnippetServiceOperations implements SnippetOperations {
 
             return Promise.resolve(testCaseResult);
         } catch (err) {
-            return Promise.resolve('fail' as TestCaseResult)
+            console.error('Error testing snippet:', err);
+            return Promise.resolve('fail' as TestCaseResult);
         }
     }
 
