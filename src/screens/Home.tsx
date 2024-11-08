@@ -7,7 +7,6 @@ import {Drawer} from "@mui/material";
 import {useGetSnippets} from "../utils/queries.tsx";
 import {usePaginationContext} from "../contexts/paginationContext.tsx";
 import useDebounce from "../hooks/useDebounce.ts";
-import {useAuth0} from "@auth0/auth0-react";
 
 const HomeScreen = () => {
   const {id: paramsId} = useParams<{ id: string }>();
@@ -16,28 +15,12 @@ const HomeScreen = () => {
   const [snippetId, setSnippetId] = useState<string | null>(null)
   const {page, page_size, count, handleChangeCount} = usePaginationContext()
   const {data, isLoading} = useGetSnippets(page, page_size, snippetName)
-    const {getAccessTokenSilently} = useAuth0();
-  const [token, setToken] = useState("")
 
   useEffect(() => {
-      const getToken = async() => {
-          const response = await getAccessTokenSilently({
-              authorizationParams: {
-                  redirect_uri: window.location.origin,
-                  audience: import.meta.env.VITE_AUTH0_AUDIENCE,
-                  scope: "read:snippets write:snippets"
-              }
-          })
-          setToken(response)
-      }
-
       if (data?.count && data.count != count) {
           handleChangeCount(data.count)
       }
-
-      getToken().then(()=>localStorage.setItem("token", token))
-
-  }, [token, count, data?.count, handleChangeCount, getAccessTokenSilently]);
+      }, [count, data?.count, handleChangeCount]);
 
 
   useEffect(() => {

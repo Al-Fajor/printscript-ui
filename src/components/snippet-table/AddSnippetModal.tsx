@@ -41,7 +41,7 @@ export const AddSnippetModal = ({open, onClose, defaultSnippet}: {
             name: snippetName,
             content: code,
             language: language,
-            extension: fileTypes?.find((f) => f.language === language)?.extension ?? "prs"
+            extension: fileTypes?.find((f) => f.language === language)?.extension ?? "ps"
         }
         await createSnippet(newSnippet);
         onClose();
@@ -98,7 +98,7 @@ export const AddSnippetModal = ({open, onClose, defaultSnippet}: {
                 >
                     {
                         fileTypes?.map(x => (
-                            <MenuItem data-testid={`menu-option-${x.language}`} key={x.language}
+                            <MenuItem data-testid={`menu-option-${x.language.toLowerCase()}`} key={x.language}
                                       value={x.language}>{capitalize((x.language))}</MenuItem>
                         ))
                     }

@@ -11,8 +11,10 @@ import {ApiRule} from "./apiTypes.ts";
 import {BACKEND_URL} from "./constants.ts";
 
 export class SnippetServiceOperations implements SnippetOperations {
-
-    token = localStorage.getItem("token")
+    private readonly token: string
+    constructor(token: string) {
+        this.token = token
+    }
 
     async createSnippet(createSnippet: CreateSnippet): Promise<Snippet> {
         const url = `${process.env.BACKEND_URL}/snippet`;
@@ -78,12 +80,12 @@ export class SnippetServiceOperations implements SnippetOperations {
     getFileTypes(): Promise<FileType[]> {
         // Extend this for all languages we're going to support
         const fileTypes: FileType[] = [
-            { language : 'Python', extension: 'py' },
-            { language: 'Printscript', extension: 'ps' },
-            { language: 'Go', extension: 'go' },
-            { language: 'Java', extension: 'java' },
-            { language: 'JavaScript', extension: 'js' },
-            { language: 'TypeScript', extension: 'ts' },
+            { language : 'Python', extension: 'py' } as FileType,
+            { language: 'Printscript', extension: 'ps' } as FileType,
+            { language: 'Go', extension: 'go' } as FileType,
+            { language: 'Java', extension: 'java' } as FileType,
+            { language: 'JavaScript', extension: 'js' } as FileType,
+            { language: 'TypeScript', extension: 'ts' } as FileType,
         ]
         return Promise.resolve(fileTypes);
     }
@@ -129,7 +131,7 @@ export class SnippetServiceOperations implements SnippetOperations {
 
         const getExtension = async (language: string): Promise<string> => {
             const fileTypes = await this.getFileTypes()
-            return fileTypes.filter(fileType => fileType.language === language)[0].extension
+            return Promise.resolve(fileTypes.find((f) => f.language === language)?.extension!)
         }
 
         try {

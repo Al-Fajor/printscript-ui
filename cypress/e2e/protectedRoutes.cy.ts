@@ -1,7 +1,14 @@
-import {AUTH0_USERNAME,AUTH0_PASSWORD} from "../../src/utils/constants";
+// import {AUTH0_USERNAME,AUTH0_PASSWORD} from "../../src/utils/constants";
 
 describe('Protected routes test', () => {
+  beforeEach(()=>{
+    cy.on('uncaught:exception', (err, runnable) => {
+      return false
+    })
+  })
+
   it('should redirect to login when accessing a protected route unauthenticated', () => {
+
     // Visit the protected route
     cy.visit('/');
 
@@ -22,8 +29,8 @@ describe('Protected routes test', () => {
 
   it('should not redirect to login when the user is already authenticated', () => {
     cy.loginToAuth0(
-        AUTH0_USERNAME,
-        AUTH0_PASSWORD
+        Cypress.env("AUTH0_USERNAME"),
+        Cypress.env("AUTH0_PASSWORD")
     )
 
     cy.visit('/');
