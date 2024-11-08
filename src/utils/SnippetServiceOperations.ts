@@ -3,7 +3,7 @@ import {CreateSnippet, PaginatedSnippets, Snippet, UpdateSnippet} from "./snippe
 import {FileType} from "../types/FileType.ts";
 import {Rule} from "../types/Rule.ts";
 import {TestCase} from "../types/TestCase.ts";
-import {PaginatedUsers} from "./users.ts";
+import {PaginatedUsers, User} from "./users.ts";
 import {TestCaseResult} from "./queries.tsx";
 import {SnippetAdapter} from "./snippetAdapter.ts";
 import axios from "axios";
@@ -195,8 +195,12 @@ export class SnippetServiceOperations implements SnippetOperations {
             }
         })
 
-        const usersFromBackend: never[] = response.data
+        const usersFromBackend: User[] = response.data.map((user: { userId: string, name: string }) => ({
+            id: user.userId,
+            name: user.name
+        }));
 
+        console.log("Users from backend", usersFromBackend)
 
         const users: PaginatedUsers = {users: usersFromBackend, page: response.data.pageNumber, count: response.data.count, page_size: response.data.pageSize};
         return Promise.resolve(users);
@@ -204,7 +208,7 @@ export class SnippetServiceOperations implements SnippetOperations {
 
     async listSnippetDescriptors(page: number, pageSize: number, snippetName?: string): Promise<PaginatedSnippets> {
         console.log('listSnippetDescriptors called with page:', page, 'pageSize:', pageSize, 'snippetName:', snippetName);
-        const response= await axios.get(`${process.env.BACKEND_URL}/user/snippets`, {
+        const ownedSnippets= await axios.get(`${process.env.BACKEND_URL}/user/snippets`, {
             params: {
                 isOwner: true,
                 isShared: false,
@@ -216,10 +220,8 @@ export class SnippetServiceOperations implements SnippetOperations {
                 Authorization: `Bearer ${this.token}`
             }
         })
-        console.log(response)
 
         function transformToSnippet(snippetJson: { id: never; name: never; content: never; language: never; compliance: never; author: never; }): Snippet {
-            // TODO
             return {
                 id: snippetJson.id,
                 name: snippetJson.name,
@@ -231,9 +233,28 @@ export class SnippetServiceOperations implements SnippetOperations {
             } as Snippet
         }
 
-        const snippetArray: Snippet[] = response.data.snippets.map((resItem: { id: never; name: never; content: never; language: never; compliance: never; author: never; }) => transformToSnippet(resItem))
+        const sharedSnippets= await axios.get(`${process.env.BACKEND_URL}/user/snippets`, {
+            params: {
+                isOwner: false,
+                isShared: true,
+                name: snippetName,
+                pageNumber: page,
+                pageSize
+            },
+            headers: {
+                Authorization: `Bearer ${this.token}`
+            }
+        })
 
-        const snippets: PaginatedSnippets = {snippets: snippetArray , page: response.data.page, count: response.data.count, page_size: response.data.pageSize}
+        const snippetsArray: Snippet[] = ownedSnippets.data.snippets.map((resItem: { id: never; name: never; content: never; language: never; compliance: never; author: never; }) => transformToSnippet(resItem))
+        console.log("Owned snippets: ", snippetsArray);
+        const sharedSnippetSArray: Snippet[] = sharedSnippets.data.snippets.map((resItem: { id: never; name: never; content: never; language: never; compliance: never; author: never; }) => transformToSnippet(resItem))
+        console.log("Shared snippets: ", sharedSnippetSArray);
+        const allSnippets = snippetsArray.concat(sharedSnippetSArray)
+
+        console.log("All snippets: ", allSnippets);
+
+        const snippets: PaginatedSnippets = {snippets: allSnippets , page: ownedSnippets.data.page, count: ownedSnippets.data.count, page_size: ownedSnippets.data.pageSize}
         return Promise.resolve(snippets);
     }
 
@@ -270,27 +291,41 @@ export class SnippetServiceOperations implements SnippetOperations {
     async postTestCase(testCase: Partial<TestCase>, snippetId: string): Promise<TestCase> {
         console.log('postTestCase called with testCase:', testCase);
         const emptyTestCase = Promise.resolve({} as TestCase)
-
-        const url = `${process.env.BACKEND_URL}/snippet/${snippetId}/test`;
+         //This only saves the test, we need the update case
+        const url = `${process.env.BACKEND_URL}/snippet/test/`;
+        let response;
         try {
-            const response = await axios.post(url,{
-                inputs: testCase.input,
-                expectedOutput: testCase.output,
-                version: "1.1",
-                name: testCase.name
-            },{
-                headers: {
-                    'Authorization': `Bearer ${this.token}`
-                }
-            })
+            if (!testCase.id) {
+                response = await axios.post(url + snippetId, {
+                    inputs: testCase.input,
+                    expectedOutput: testCase.output,
+                    name: testCase.name
+                }, {
+                    headers: {
+                        'Authorization': `Bearer ${this.token}`
+                    }
+                })
 
-            if (response.status === 500) return emptyTestCase
-
-            const body: {snippetId: string, name: string, inputs?: [], expectedOutput?: []} = response.data.body
+                if (response.status === 500) return emptyTestCase
+            }
+            else {
+                //This is the update case
+                response = await axios.put(url + testCase.id, {
+                    id: testCase.id,
+                    inputs: testCase.input,
+                    expectedOutput: testCase.output,
+                    name: testCase.name
+                }, {
+                    headers: {
+                        'Authorization': `Bearer ${this.token}`
+                    }
+                })
+            }
+            const body: {id: string, name: string, inputs?: [], expectedOutput?: []} = response.data.body
 
             return Promise.resolve(
                 {
-                    id: body.snippetId,
+                    id: body.id,
                     name: body.name,
                     input: body.inputs,
                     output: body.expectedOutput
@@ -318,7 +353,7 @@ export class SnippetServiceOperations implements SnippetOperations {
         const url = `${process.env.BACKEND_URL}/snippet/${snippetId}/share`;
         // Create permission, share to this user
         await axios.post(url,
-            {userId},{
+            {userId: userId},{
             headers: {
                 'Authorization': `Bearer ${this.token}`
             }
@@ -330,12 +365,18 @@ export class SnippetServiceOperations implements SnippetOperations {
     async testSnippet(testCase: Partial<TestCase>): Promise<TestCaseResult> {
         console.log('testSnippet called with testCase:', testCase);
         try {
-            const url = `${process.env.BACKEND_URL}/snippet/test/${testCase.id}`
+            const url = `${process.env.BACKEND_URL}/snippet/test/${testCase.id!}/get-results`;
             const testResult = await axios.get(url, {
-                headers:{
+                headers: {
                     'Authorization': `Bearer ${this.token}`
                 }
             });
+
+            if (!testResult || !testResult.data) {
+                throw new Error('Empty response from server');
+            }
+
+            console.log(`Test result: ${testResult.data}`);
             let testCaseResult: TestCaseResult;
 
             switch (testResult.data) {
@@ -351,7 +392,8 @@ export class SnippetServiceOperations implements SnippetOperations {
 
             return Promise.resolve(testCaseResult);
         } catch (err) {
-            return Promise.resolve('fail' as TestCaseResult)
+            console.error('Error testing snippet:', err);
+            return Promise.resolve('fail' as TestCaseResult);
         }
     }
 
