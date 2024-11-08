@@ -3,7 +3,7 @@ import {CreateSnippet, PaginatedSnippets, Snippet, UpdateSnippet} from "./snippe
 import {FileType} from "../types/FileType.ts";
 import {Rule} from "../types/Rule.ts";
 import {TestCase} from "../types/TestCase.ts";
-import {PaginatedUsers} from "./users.ts";
+import {PaginatedUsers, User} from "./users.ts";
 import {TestCaseResult} from "./queries.tsx";
 import {SnippetAdapter} from "./snippetAdapter.ts";
 import axios from "axios";
@@ -190,16 +190,21 @@ export class SnippetServiceOperations implements SnippetOperations {
             }
         })
 
-        const usersFromBackend: never[] = response.data
+        const usersFromBackend: User[] = response.data.map((user: { userId: string, name: string }) => ({
+            id: user.userId,
+            name: user.name
+        }));
+
+        console.log("Users from backend", usersFromBackend)
 
 
-        const users: PaginatedUsers = {users: usersFromBackend, page: 0, count: 0, page_size: 0};
+        const users: PaginatedUsers = {users: usersFromBackend, page: 1, count: usersFromBackend.length, page_size: usersFromBackend.length}; //Hardcoded
         return Promise.resolve(users);
     }
 
     async listSnippetDescriptors(page: number, pageSize: number, snippetName?: string): Promise<PaginatedSnippets> {
         console.log('listSnippetDescriptors called with page:', page, 'pageSize:', pageSize, 'snippetName:', snippetName);
-        const response= await axios.get(`${process.env.BACKEND_URL}/user/snippets`, {
+        const ownedSnippets= await axios.get(`${process.env.BACKEND_URL}/user/snippets`, {
             params: {
                 isOwner: true,
                 isShared: false,
@@ -211,10 +216,8 @@ export class SnippetServiceOperations implements SnippetOperations {
                 Authorization: `Bearer ${this.token}`
             }
         })
-        console.log(response)
 
         function transformToSnippet(snippetJson: { id: never; name: never; content: never; language: never; compliance: never; author: never; }): Snippet {
-            // TODO
             return {
                 id: snippetJson.id,
                 name: snippetJson.name,
@@ -226,9 +229,28 @@ export class SnippetServiceOperations implements SnippetOperations {
             } as Snippet
         }
 
-        const snippetArray: Snippet[] = response.data.snippets.map((resItem: { id: never; name: never; content: never; language: never; compliance: never; author: never; }) => transformToSnippet(resItem))
+        const sharedSnippets= await axios.get(`${process.env.BACKEND_URL}/user/snippets`, {
+            params: {
+                isOwner: false,
+                isShared: true,
+                name: snippetName,
+                pageNumber: page,
+                pageSize
+            },
+            headers: {
+                Authorization: `Bearer ${this.token}`
+            }
+        })
 
-        const snippets: PaginatedSnippets = {snippets: snippetArray , page: response.data.page, count: response.data.count, page_size: response.data.pageSize}
+        const snippetsArray: Snippet[] = ownedSnippets.data.snippets.map((resItem: { id: never; name: never; content: never; language: never; compliance: never; author: never; }) => transformToSnippet(resItem))
+        console.log("Owned snippets: ", snippetsArray);
+        const sharedSnippetSArray: Snippet[] = sharedSnippets.data.snippets.map((resItem: { id: never; name: never; content: never; language: never; compliance: never; author: never; }) => transformToSnippet(resItem))
+        console.log("Shared snippets: ", sharedSnippetSArray);
+        const allSnippets = snippetsArray.concat(sharedSnippetSArray)
+
+        console.log("All snippets: ", allSnippets);
+
+        const snippets: PaginatedSnippets = {snippets: allSnippets , page: ownedSnippets.data.page, count: ownedSnippets.data.count, page_size: ownedSnippets.data.pageSize}
         return Promise.resolve(snippets);
     }
 
@@ -327,7 +349,7 @@ export class SnippetServiceOperations implements SnippetOperations {
         const url = `${process.env.BACKEND_URL}/snippet/${snippetId}/share`;
         // Create permission, share to this user
         await axios.post(url,
-            {userId},{
+            {userId: userId},{
             headers: {
                 'Authorization': `Bearer ${this.token}`
             }
