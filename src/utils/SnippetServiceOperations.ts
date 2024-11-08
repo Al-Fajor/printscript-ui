@@ -185,6 +185,11 @@ export class SnippetServiceOperations implements SnippetOperations {
         console.log('getUserFriends called with name:', name, 'page:', page, 'pageSize:', pageSize);
         // Only need to send userId and name
         const response= await axios.get(`${process.env.BACKEND_URL}/user-data/users`, {
+            params: {
+                name,
+                pageNumber: page,
+                pageSize
+            },
             headers: {
                 Authorization: `Bearer ${this.token}`
             }
@@ -193,7 +198,7 @@ export class SnippetServiceOperations implements SnippetOperations {
         const usersFromBackend: never[] = response.data
 
 
-        const users: PaginatedUsers = {users: usersFromBackend, page: 0, count: 0, page_size: 0};
+        const users: PaginatedUsers = {users: usersFromBackend, page: response.data.pageNumber, count: response.data.count, page_size: response.data.pageSize};
         return Promise.resolve(users);
     }
 
