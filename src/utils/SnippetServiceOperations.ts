@@ -299,7 +299,8 @@ export class SnippetServiceOperations implements SnippetOperations {
                 response = await axios.post(url + snippetId, {
                     inputs: testCase.input,
                     expectedOutput: testCase.output,
-                    name: testCase.name
+                    name: testCase.name,
+                    version: "1.1"
                 }, {
                     headers: {
                         'Authorization': `Bearer ${this.token}`
