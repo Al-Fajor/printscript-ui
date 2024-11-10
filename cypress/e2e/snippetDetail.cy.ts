@@ -15,7 +15,7 @@ describe('Add snippet tests', () => {
       statusCode: 201,
       body: fakeStore.getSnippetById("1"),
     }).as("getSnippetById")
-    cy.intercept('GET', Cypress.env("BACKEND_URL")+"/snippets").as("getSnippets")
+    cy.intercept('GET', Cypress.env("BACKEND_URL")+"/user/snippets").as("getSnippets")
 
     cy.visit("/")
 

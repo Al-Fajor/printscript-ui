@@ -80,12 +80,12 @@ export class SnippetServiceOperations implements SnippetOperations {
     getFileTypes(): Promise<FileType[]> {
         // Extend this for all languages we're going to support
         const fileTypes: FileType[] = [
-            { language : 'Python', extension: 'py' } as FileType,
-            { language: 'Printscript', extension: 'ps' } as FileType,
-            { language: 'Go', extension: 'go' } as FileType,
-            { language: 'Java', extension: 'java' } as FileType,
-            { language: 'JavaScript', extension: 'js' } as FileType,
-            { language: 'TypeScript', extension: 'ts' } as FileType,
+            { language : 'Python', extension: 'py' },
+            { language: 'Printscript', extension: 'ps' },
+            { language: 'Go', extension: 'go' },
+            { language: 'Java', extension: 'java' },
+            { language: 'JavaScript', extension: 'js' },
+            { language: 'TypeScript', extension: 'ts' },
         ]
         return Promise.resolve(fileTypes);
     }

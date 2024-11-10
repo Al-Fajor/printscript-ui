@@ -15,6 +15,16 @@ describe('Home', () => {
     process.env.FRONTEND_URL = Cypress.env("FRONTEND_URL");
     process.env.BACKEND_URL = Cypress.env("BACKEND_URL");
   })
+
+  it('Renders home and clicks SNIPPETS button', () => {
+    cy.visit(Cypress.env("FRONTEND_URL"));
+    cy.get('.MuiTypography-h6').should('have.text', 'Printscript');
+    cy.get('.MuiBox-root > .MuiInputBase-root > .MuiInputBase-input').should('be.visible');
+    cy.get('.css-9jay18 > .MuiButton-root').should('be.visible');
+    cy.get('.css-jie5ja').click(); // Click the SNIPPETS button
+  });
+
+
   it('Renders home', () => {
     cy.visit(Cypress.env("FRONTEND_URL"))
     /* ==== Generated with Cypress Studio ==== */
@@ -25,51 +35,87 @@ describe('Home', () => {
     /* ==== End Cypress Studio ==== */
   })
 
-  // You need to have at least 1 snippet in your DB for this test to pass
-  it('Renders the first snippets', () => {
-    cy.visit(Cypress.env("FRONTEND_URL"))
-    const first10Snippets = cy.get('[data-testid="snippet-row"]')
-
-    first10Snippets.should('have.length.greaterThan', 0)
-
-    first10Snippets.should('have.length.lessThan', 10)
-  })
 
   it('Can creat snippet find snippets by name', () => {
     cy.visit(Cypress.env("FRONTEND_URL"))
     const snippetData: CreateSnippet = {
       name: "Test name",
-      content: "print(1);",
+      content: "println(1);",
       language: "Printscript",
       extension: ".ps"
     }
 
-    cy.intercept('GET', Cypress.env("BACKEND_URL")+"/user/snippets*", (req) => {
+
+    const backendUrl = Cypress.env("BACKEND_URL").replace(':80', "")
+    const postUrl = backendUrl + "/snippet"
+    // Wait for snippets to load
+    const url = backendUrl + "/user/snippets?isOwner=true&isShared=false?name=?pageNumber=0?pageSize=10"
+
+    console.log(url)
+    cy.intercept('GET', url, (req) => {
       req.headers = {'Authorization': `Bearer ${localStorage.getItem("authAccessToken")}`}
       req.reply((res) => {
         expect(res.statusCode).to.eq(200);
       });
     }).as('getSnippets');
 
-    cy.request({
-      method: 'POST',
-      url: '/snippet', // Adjust if you have a different base URL configured in Cypress
-      body: snippetData,
-      headers: {'Authorization': `Bearer ${localStorage.getItem("authAccessToken")}`},
-      failOnStatusCode: false // Optional: set to true if you want the test to fail on non-2xx status codes
-    }).then((response) => {
-      expect(response.status).to.eq(200);
 
-      expect(response.body.name).to.eq(snippetData.name)
-      expect(response.body.content).to.eq(snippetData.content)
-      expect(response.body.language).to.eq(snippetData.language)
-      expect(response.body).to.haveOwnProperty("id")
 
-      cy.get('.MuiBox-root > .MuiInputBase-root > .MuiInputBase-input').clear();
-      cy.get('.MuiBox-root > .MuiInputBase-root > .MuiInputBase-input').type(snippetData.name + "{enter}");
+    cy.intercept('POST', postUrl, (req) => {
+      req.reply((res) => {
+        expect(res.statusCode).to.eq(201);
+      });
+    }).as('postRequest');
 
-      cy.wait("@getSnippets")
+    cy.wait(10000) //Render page
+    cy.get('.css-9jay18 > .MuiButton-root').click();
+    cy.wait("@getSnippets")
+
+    cy.get('.MuiList-root > [tabindex="0"]').click();
+    cy.get('#name').type(snippetData.name);
+    cy.get('#demo-simple-select').click()
+    cy.get('body').click();
+    cy.get(`[data-testid="menu-option-${snippetData.language}"]`).click()
+
+    cy.get('[data-testid="add-snippet-code-editor"]').click();
+    cy.get('[data-testid="add-snippet-code-editor"]').type(snippetData.content);
+    cy.get('[data-testid="SaveIcon"]').click();
+
+    cy.wait('@postRequest').its('response.statusCode').should('eq', 201);
+    cy.wait(20000)
+
+      cy.get('.MuiBox-root > .MuiInputBase-root > .MuiInputBase-input').clear()
+      cy.get('.MuiBox-root > .MuiInputBase-root > .MuiInputBase-input').type(snippetData.name + "{enter}")
+
+
+
       cy.contains(snippetData.name).should('exist');
     })
+
+
+  // You need to have at least 1 snippet in your DB for this test to pass
+  it('Renders the first snippets', () => {
+    cy.visit(Cypress.env("FRONTEND_URL"))
+
+    const backendUrl = Cypress.env('BACKEND_URL').replace(':80', '')
+    const url = backendUrl + "/user/snippets?isOwner=true&isShared=false?name=?pageNumber=0?pageSize=10"
+
+    console.log(url)
+    cy.intercept('GET', url, (req) => {
+      req.headers = {'Authorization': `Bearer ${localStorage.getItem("authAccessToken")}`}
+      req.reply((res) => {
+        expect(res.statusCode).to.eq(200);
+      });
+    }).as('getSnippets');
+
+    cy.wait(13000)
+    cy.get('body').click(0, 0);
+    cy.wait("@getSnippets")
+
+    const first10Snippets = cy.get('[data-testid="snippet-row"]')
+
+    first10Snippets.should('have.length.greaterThan', 0)
+
+    first10Snippets.should('have.length.lte', 10)
   })
 })

@@ -98,7 +98,7 @@ export const AddSnippetModal = ({open, onClose, defaultSnippet}: {
                 >
                     {
                         fileTypes?.map(x => (
-                            <MenuItem data-testid={`menu-option-${x.language.toLowerCase()}`} key={x.language}
+                            <MenuItem data-testid={`menu-option-${x.language}`} key={x.language}
                                       value={x.language}>{capitalize((x.language))}</MenuItem>
                         ))
                     }
