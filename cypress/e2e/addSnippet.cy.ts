@@ -42,10 +42,9 @@ describe('Add snippet tests', () => {
 
   it('Can add snippets via file', () => {
     cy.visit("/")
-    cy.intercept('POST', Cypress.env("BACKEND_URL")+"/snippet", (req) => {
+    cy.intercept('POST', Cypress.env("BACKEND_URL").replace(':80','')+"/snippet", (req) => {
       req.headers = {'Authorization': `Bearer ${localStorage.getItem('authAccessToken')}`}
       req.reply((res) => {
-        // expect(res.body).to.include.keys("id","name","content","language")
         expect(res.statusCode).to.eq(201);
       });
     }).as('postRequest');
@@ -53,7 +52,20 @@ describe('Add snippet tests', () => {
     cy.wait(10000) // Need to render page and languages
 
     /* ==== Generated with Cypress Studio ==== */
-    cy.get('body').click();
+    const backendUrl = Cypress.env("BACKEND_URL").replace(':80', "")
+    // Wait for snippets to load
+    const url = backendUrl + "/user/snippets?isOwner=true&isShared=false?name=?pageNumber=0?pageSize=10"
+
+
+    cy.intercept('GET', url, (req) => {
+      req.headers = {'Authorization': `Bearer ${localStorage.getItem("authAccessToken")}`}
+      req.reply((res) => {
+        expect(res.statusCode).to.eq(200);
+      });
+    }).as('getSnippets');
+    cy.get('.css-9jay18 > .MuiButton-root').click();
+
+    cy.wait("@getSnippets")
     cy.get('[data-testid="upload-file-input"').selectFile("cypress/fixtures/example_ps.ps", {force: true})
 
     cy.get('[data-testid="SaveIcon"]').click();
