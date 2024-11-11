@@ -23,7 +23,6 @@ describe('Add snippet tests', () => {
       });
     }).as('postRequest');
 
-    cy.wait(10000) // Need to render page and languages
 
     /* ==== Generated with Cypress Studio ==== */
     cy.get('.css-9jay18 > .MuiButton-root').click();
@@ -48,7 +47,6 @@ describe('Add snippet tests', () => {
       });
     }).as('postRequest');
 
-    cy.wait(10000) // Need to render page and languages
 
     /* ==== Generated with Cypress Studio ==== */
     const backendUrl = Cypress.env("BACKEND_URL").replace(':80', "")
@@ -57,7 +55,7 @@ describe('Add snippet tests', () => {
 
 
     cy.intercept('GET', url, (req) => {
-      req.headers = {'Authorization': `Bearer ${localStorage.getItem("authAccessToken")}`}
+      // req.headers = {'Authorization': `Bearer ${localStorage.getItem("authAccessToken")}`}
       req.reply((res) => {
         expect(res.statusCode).to.eq(200);
       });

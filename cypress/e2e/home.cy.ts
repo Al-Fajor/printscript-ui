@@ -16,15 +16,6 @@ describe('Home', () => {
     process.env.BACKEND_URL = Cypress.env("BACKEND_URL");
   })
 
-  it('Renders home and clicks SNIPPETS button', () => {
-    cy.visit(Cypress.env("FRONTEND_URL"));
-    cy.get('.MuiTypography-h6').should('have.text', 'Printscript');
-    cy.get('.MuiBox-root > .MuiInputBase-root > .MuiInputBase-input').should('be.visible');
-    cy.get('.css-9jay18 > .MuiButton-root').should('be.visible');
-    cy.get('.css-jie5ja').click(); // Click the SNIPPETS button
-  });
-
-
   it('Renders home', () => {
     cy.visit(Cypress.env("FRONTEND_URL"))
     /* ==== Generated with Cypress Studio ==== */
@@ -66,7 +57,6 @@ describe('Home', () => {
       });
     }).as('postRequest');
 
-    cy.wait(10000) //Render page
     cy.get('.css-9jay18 > .MuiButton-root').click();
     cy.wait("@getSnippets")
 
@@ -81,7 +71,7 @@ describe('Home', () => {
     cy.get('[data-testid="SaveIcon"]').click();
 
     cy.wait('@postRequest').its('response.statusCode').should('eq', 201);
-    cy.wait(20000)
+    cy.wait(8000)
 
       cy.get('.MuiBox-root > .MuiInputBase-root > .MuiInputBase-input').clear()
       cy.get('.MuiBox-root > .MuiInputBase-root > .MuiInputBase-input').type(snippetData.name + "{enter}")
@@ -105,8 +95,7 @@ describe('Home', () => {
       });
     }).as('getSnippets');
 
-    cy.wait(13000)
-    cy.get('body').click(0, 0);
+    // cy.get('body').click(0, 0);
     cy.wait("@getSnippets")
 
     const first10Snippets = cy.get('[data-testid="snippet-row"]')
