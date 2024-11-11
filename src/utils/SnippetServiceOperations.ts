@@ -197,12 +197,14 @@ export class SnippetServiceOperations implements SnippetOperations {
             }
         })
 
-        const usersFromBackend: User[] = response.data.map((user: { userId: string, name: string }) => ({
+        console.log(response.data)
+
+        const usersFromBackend: User[] = response.data.snippets.map((user: { userId: string, name: string }) => ({ // Prop name is incorrect
             id: user.userId,
             name: user.name
         }));
 
-        console.log("Users from backend", usersFromBackend)
+        console.log("Users from backend: ", usersFromBackend)
 
         const users: PaginatedUsers = {users: usersFromBackend, page: response.data.pageNumber, count: response.data.count, page_size: response.data.pageSize};
         return Promise.resolve(users);
@@ -249,12 +251,9 @@ export class SnippetServiceOperations implements SnippetOperations {
         })
 
         const snippetsArray: Snippet[] = ownedSnippets.data.snippets.map((resItem: { id: never; name: never; content: never; language: never; compliance: never; author: never; }) => transformToSnippet(resItem))
-        console.log("Owned snippets: ", snippetsArray);
         const sharedSnippetSArray: Snippet[] = sharedSnippets.data.snippets.map((resItem: { id: never; name: never; content: never; language: never; compliance: never; author: never; }) => transformToSnippet(resItem))
-        console.log("Shared snippets: ", sharedSnippetSArray);
         const allSnippets = snippetsArray.concat(sharedSnippetSArray)
 
-        console.log("All snippets: ", allSnippets);
 
         const snippets: PaginatedSnippets = {snippets: allSnippets , page: ownedSnippets.data.page, count: ownedSnippets.data.count, page_size: ownedSnippets.data.pageSize}
         return Promise.resolve(snippets);
@@ -378,7 +377,6 @@ export class SnippetServiceOperations implements SnippetOperations {
                 throw new Error('Empty response from server');
             }
 
-            console.log(`Test result: ${testResult.data}`);
             let testCaseResult: TestCaseResult;
 
             switch (testResult.data) {

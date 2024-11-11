@@ -49,7 +49,6 @@ export const SnippetTable = (props: SnippetTableProps) => {
     }
     const file = files[0]
     const splitName = file.name.split(".")
-    console.log(`file extension: ${splitName.at(-1)}`)
     const fileType = getFileLanguage(fileTypes ?? [], splitName.at(-1))
     if (!fileType) {
       createSnackbar('error', `File type ${splitName.at(-1)} not supported`)

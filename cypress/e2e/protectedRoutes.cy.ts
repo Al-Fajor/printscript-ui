@@ -2,7 +2,7 @@
 
 describe('Protected routes test', () => {
   beforeEach(()=>{
-    cy.on('uncaught:exception', (err, runnable) => {
+    cy.on('uncaught:exception', () => {
       return false
     })
   })

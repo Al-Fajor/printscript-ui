@@ -1,41 +1,45 @@
-// import {AUTH0_PASSWORD, AUTH0_USERNAME, BACKEND_URL} from "../../src/utils/constants";
-import {FakeSnippetStore} from "../../src/utils/mock/fakeSnippetStore";
-
+const BACKEND_URL = Cypress.env('BACKEND_URL').replace(':80', '')
 describe('Add snippet tests', () => {
-  const fakeStore = new FakeSnippetStore()
+
   beforeEach(() => {
-    cy.on('uncaught:exception', (err, runnable) => {
+    cy.on('uncaught:exception', () => {
       return false
     })
+
     cy.loginToAuth0(
         Cypress.env("AUTH0_USERNAME"),
         Cypress.env("AUTH0_PASSWORD")
     )
-    cy.intercept('GET', Cypress.env("BACKEND_URL")+"/snippets/*", {
-      statusCode: 201,
-      body: fakeStore.getSnippetById("1"),
-    }).as("getSnippetById")
-    cy.intercept('GET', Cypress.env("BACKEND_URL")+"/user/snippets").as("getSnippets")
+
+    cy.intercept('GET', BACKEND_URL+"/user/snippets?isOwner=true&isShared=false?name=?pageNumber=0?pageSize=10")
+        .as("getSnippets")
 
     cy.visit("/")
+    cy.wait(10000)
 
+    cy.get('.css-9jay18 > .MuiButton-root').click();
     cy.wait("@getSnippets")
+
+    cy.get('body').click(0, 0)
     // cy.wait(2000) // TODO comment this line and uncomment 19 to wait for the real data
     cy.get('.MuiTableBody-root > :nth-child(1) > :nth-child(1)').click();
+    cy.wait(10000)
   })
 
   it('Can share a snippet ', () => {
     cy.get('[aria-label="Share"]').click();
-    cy.get('#\\:rl\\:').click();
-    cy.get('#\\:rl\\:-option-0').click();
+    cy.wait(10000) // Need to render user list
+    cy.get('.css-1h51icj-MuiAutocomplete-root .MuiOutlinedInput-root .MuiAutocomplete-input').click();
+    cy.get('.css-gdh49b-MuiAutocomplete-listbox .MuiAutocomplete-option').first().click();
     cy.get('.css-1yuhvjn > .MuiBox-root > .MuiButton-contained').click();
     cy.wait(2000)
   })
 
-  it('Can run snippets', function() {
-    cy.get('[data-testid="PlayArrowIcon"]').click();
-    cy.get('.css-1hpabnv > .MuiBox-root > div > .npm__react-simple-code-editor__textarea').should("have.length.greaterThan",0);
-  });
+  // There's no button in the UI that shows that a Snippet can be run
+  // it('Can run snippets', function() {
+  //   cy.get('[data-testid="PlayArrowIcon"]').click();
+  //   cy.get('.css-1hpabnv > .MuiBox-root > div > .npm__react-simple-code-editor__textarea').should("have.length.greaterThan",0);
+  // });
 
   it('Can format snippets', function() {
     cy.get('[data-testid="ReadMoreIcon"] > path').click();

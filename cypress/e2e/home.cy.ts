@@ -3,7 +3,7 @@ import {CreateSnippet} from "../../src/utils/snippet";
 
 describe('Home', () => {
   beforeEach(() => {
-    cy.on('uncaught:exception', (err, runnable) => {
+    cy.on('uncaught:exception', () => {
       return false
     })
     cy.loginToAuth0(
@@ -51,7 +51,6 @@ describe('Home', () => {
     // Wait for snippets to load
     const url = backendUrl + "/user/snippets?isOwner=true&isShared=false?name=?pageNumber=0?pageSize=10"
 
-    console.log(url)
     cy.intercept('GET', url, (req) => {
       req.headers = {'Authorization': `Bearer ${localStorage.getItem("authAccessToken")}`}
       req.reply((res) => {
@@ -99,8 +98,6 @@ describe('Home', () => {
 
     const backendUrl = Cypress.env('BACKEND_URL').replace(':80', '')
     const url = backendUrl + "/user/snippets?isOwner=true&isShared=false?name=?pageNumber=0?pageSize=10"
-
-    console.log(url)
     cy.intercept('GET', url, (req) => {
       req.headers = {'Authorization': `Bearer ${localStorage.getItem("authAccessToken")}`}
       req.reply((res) => {

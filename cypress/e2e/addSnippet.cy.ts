@@ -2,7 +2,7 @@
 
 describe('Add snippet tests', () => {
   beforeEach(() => {
-    cy.on('uncaught:exception', (err, runnable) => {
+    cy.on('uncaught:exception', () => {
       return false
     })
 
@@ -16,10 +16,9 @@ describe('Add snippet tests', () => {
     cy.visit("/")
     const backendUrl = Cypress.env("BACKEND_URL")
     const url = backendUrl.replace(':80', "") + "/snippet"
-    console.log("Backend url: ", url)
     cy.intercept('POST', url, (req) => {
       req.reply((res) => {
-        // expect(res.body).to.include.keys("id","name","content","language")
+        req.headers = {'Authorization': `Bearer ${localStorage.getItem("authAccessToken")}`}
         expect(res.statusCode).to.eq(201);
       });
     }).as('postRequest');
