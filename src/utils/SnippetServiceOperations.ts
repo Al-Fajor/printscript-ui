@@ -11,10 +11,12 @@ import {ApiRule} from "./apiTypes.ts";
 import {BACKEND_URL} from "./constants.ts";
 
 export class SnippetServiceOperations implements SnippetOperations {
-    private readonly token: string
-    constructor(token: string) {
-        this.token = token
-    }
+    private token: Promise<string>
+
+    constructor(stringPromise: Promise<string>) {
+        this.token= stringPromise
+        }
+
 
     async createSnippet(createSnippet: CreateSnippet): Promise<Snippet> {
         const url = `${process.env.BACKEND_URL}/snippet`;
@@ -24,7 +26,7 @@ export class SnippetServiceOperations implements SnippetOperations {
         try {
             const response = await axios.post(url, formData, {
                 headers: {
-                    'Authorization': `Bearer ${this.token}`,
+                    'Authorization': `Bearer ${await this.token}`,
                 },
             });
             return response.data;
@@ -41,7 +43,7 @@ export class SnippetServiceOperations implements SnippetOperations {
         try {
             await axios.delete(url,{
                 headers: {
-                    'Authorization': `Bearer ${this.token}`,
+                    'Authorization': `Bearer ${await this.token}`,
                 }
             })
             console.log('Snippet deleted successfully');
@@ -59,7 +61,7 @@ export class SnippetServiceOperations implements SnippetOperations {
 
         try {
             const response = await axios.post(url, null, {
-                headers: { 'Authorization': `Bearer ${this.token}` },
+                headers: { 'Authorization': `Bearer ${await this.token}` },
                 params: {
                     file: snippet,
                     language: 'Printscript',
@@ -105,7 +107,7 @@ export class SnippetServiceOperations implements SnippetOperations {
 
         try {
             const response = await axios.get(url, {
-                headers: { 'Authorization': `Bearer ${this.token}` },
+                headers: { 'Authorization': `Bearer ${await this.token}` },
                 params: { language: 'Printscript', action: action }
             })
 
@@ -137,7 +139,7 @@ export class SnippetServiceOperations implements SnippetOperations {
         try {
             const response = await axios.get(url, {
                 headers: {
-                    'Authorization': `Bearer ${this.token}`,
+                    'Authorization': `Bearer ${await this.token}`,
                 }
             });
 
@@ -163,7 +165,7 @@ export class SnippetServiceOperations implements SnippetOperations {
     async getTestCases(snippetId: string): Promise<TestCase[]> {
         const response = await axios.get(`${process.env.BACKEND_URL}/snippet/${snippetId}/test/all`, {
             headers: {
-                Authorization: `Bearer ${this.token}`
+                Authorization: `Bearer ${await this.token}`
             }
         })
 
@@ -193,7 +195,7 @@ export class SnippetServiceOperations implements SnippetOperations {
                 pageSize
             },
             headers: {
-                Authorization: `Bearer ${this.token}`
+                Authorization: `Bearer ${await this.token}`
             }
         })
 
@@ -221,7 +223,7 @@ export class SnippetServiceOperations implements SnippetOperations {
                 pageSize
             },
             headers: {
-                Authorization: `Bearer ${this.token}`
+                Authorization: `Bearer ${await this.token}`
             }
         })
 
@@ -246,7 +248,7 @@ export class SnippetServiceOperations implements SnippetOperations {
                 pageSize
             },
             headers: {
-                Authorization: `Bearer ${this.token}`
+                Authorization: `Bearer ${await this.token}`
             }
         })
 
@@ -276,7 +278,7 @@ export class SnippetServiceOperations implements SnippetOperations {
             const response = await axios.put(
                 url,
                 newRules.map(rule => ({...rule, action})),
-                { headers: { 'Authorization': `Bearer ${this.token}` } }
+                { headers: { 'Authorization': `Bearer ${await this.token}` } }
             )
 
             if (!response) {
@@ -303,7 +305,7 @@ export class SnippetServiceOperations implements SnippetOperations {
                     name: testCase.name
                 }, {
                     headers: {
-                        'Authorization': `Bearer ${this.token}`
+                        'Authorization': `Bearer ${await this.token}`
                     }
                 })
 
@@ -318,7 +320,7 @@ export class SnippetServiceOperations implements SnippetOperations {
                     name: testCase.name
                 }, {
                     headers: {
-                        'Authorization': `Bearer ${this.token}`
+                        'Authorization': `Bearer ${await this.token}`
                     }
                 })
             }
@@ -341,7 +343,7 @@ export class SnippetServiceOperations implements SnippetOperations {
         const url = `${process.env.BACKEND_URL}/snippet/test/${id}`;
         const response = await axios.delete(url, {
             headers: {
-                'Authorization': `Bearer ${this.token}`
+                'Authorization': `Bearer ${await this.token}`
             }
         })
         // This endpoint MUST return a string in its body, independently if the test exists
@@ -356,7 +358,7 @@ export class SnippetServiceOperations implements SnippetOperations {
         await axios.post(url,
             {userId: userId},{
             headers: {
-                'Authorization': `Bearer ${this.token}`
+                'Authorization': `Bearer ${await this.token}`
             }
         })
 
@@ -369,7 +371,7 @@ export class SnippetServiceOperations implements SnippetOperations {
             const url = `${process.env.BACKEND_URL}/snippet/test/${testCase.id!}/get-results`;
             const testResult = await axios.get(url, {
                 headers: {
-                    'Authorization': `Bearer ${this.token}`
+                    'Authorization': `Bearer ${await this.token}`
                 }
             });
 
@@ -411,7 +413,7 @@ export class SnippetServiceOperations implements SnippetOperations {
                     content: updateSnippet.content
             }, {
                 headers: {
-                    'Authorization': `Bearer ${this.token}`,
+                    'Authorization': `Bearer ${await this.token}`,
                 },
             });
             return response.data;

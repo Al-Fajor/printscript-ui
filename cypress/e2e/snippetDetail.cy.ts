@@ -15,7 +15,6 @@ describe('Add snippet tests', () => {
         .as("getSnippets")
 
     cy.visit("/")
-    cy.wait(10000)
 
     cy.get('.css-9jay18 > .MuiButton-root').click();
     cy.wait("@getSnippets")
@@ -23,16 +22,13 @@ describe('Add snippet tests', () => {
     cy.get('body').click(0, 0)
     // cy.wait(2000) // TODO comment this line and uncomment 19 to wait for the real data
     cy.get('.MuiTableBody-root > :nth-child(1) > :nth-child(1)').click();
-    cy.wait(10000)
   })
 
   it('Can share a snippet ', () => {
     cy.get('[aria-label="Share"]').click();
-    cy.wait(10000) // Need to render user list
     cy.get('.css-1h51icj-MuiAutocomplete-root .MuiOutlinedInput-root .MuiAutocomplete-input').click();
     cy.get('.css-gdh49b-MuiAutocomplete-listbox .MuiAutocomplete-option').first().click();
     cy.get('.css-1yuhvjn > .MuiBox-root > .MuiButton-contained').click();
-    cy.wait(2000)
   })
 
   // There's no button in the UI that shows that a Snippet can be run
