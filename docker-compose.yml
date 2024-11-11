@@ -1,0 +1,18 @@
+services:
+  ui:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: 'ui'
+    ports:
+      - "5173:5173"
+    command: npm run dev
+    env_file:
+      - .env
+    networks:
+      - app-network
+networks:
+  app-network:
+    external: true
+    name: app-network
+    driver: bridge
