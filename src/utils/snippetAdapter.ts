@@ -3,7 +3,6 @@ import {CreateSnippet} from "./snippet.ts";
 
 export class SnippetAdapter {
     createSnippet(createSnippet: CreateSnippet): FormData {
-        console.log(createSnippet)
         const formData = new FormData();
         const fileBlob = new Blob([createSnippet.content], { type: 'text/plain' });
 

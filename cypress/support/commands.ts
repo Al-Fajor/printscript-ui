@@ -35,3 +35,40 @@
 //     }
 //   }
 // }
+import jwt from 'jsonwebtoken'
+Cypress.Commands.add('loginByAuth0Api', () => {
+    cy.request({
+        method: 'POST',
+        url: `https://YOUR_AUTH0_DOMAIN/oauth/token`,
+        body: {
+            grant_type: 'password',
+            username: Cypress.env('AUTH0_USERNAME'),
+            password: Cypress.env('AUTH0_PASSWORD'),
+            audience: process.env.VITE_AUTH0_AUDIENCE,
+            scope: 'openid profile email',
+            client_id: process.env.VITE_AUTH0_CLIENT_ID,
+            client_secret: process.env.VITE_AUTH0_CLIENT_SECRET,
+        },
+    }).then(({ body }) => {
+        const { access_token, expires_in, id_token } = body;
+
+        const auth0State = {
+            nonce: '',
+            audience: process.env.VITE_AUTH0_AUDIENCE,
+            client_id: process.env.VITE_AUTH0_CLIENT_ID,
+            scope: 'openid profile email',
+            token_type: 'Bearer',
+            id_token,
+            access_token,
+            expires_in,
+            decodedToken: {
+                user: jwt.decode(id_token),
+            },
+        };
+
+        window.localStorage.setItem(
+            `@@auth0spajs@@::${auth0State.client_id}::${auth0State.audience}::${auth0State.scope}`,
+            JSON.stringify(auth0State)
+        );
+    });
+});
