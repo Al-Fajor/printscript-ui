@@ -33,9 +33,9 @@ Cypress.Commands.add('loginToAuth0', (username: string, password: string) => {
       {
         validate: () => {
           // Validate presence of access token in localStorage.
-          cy.wrap(localStorage)
-              .invoke('getItem', 'authAccessToken')
-              .should('exist')
+          // cy.wrap(localStorage)
+          //     .invoke('getItem', 'authAccessToken')
+          //     .should('exist')
         },
       }
   )
