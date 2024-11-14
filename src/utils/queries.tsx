@@ -23,7 +23,6 @@ const useSnippetOperations = () => {
             }
         })
             .then(token => {
-                console.log(token)
                 localStorage.setItem("authAccessToken", token)
             })
             .catch(error => console.error(error));
