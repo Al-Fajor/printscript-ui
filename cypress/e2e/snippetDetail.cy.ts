@@ -1,4 +1,4 @@
-const BACKEND_URL = Cypress.env('BACKEND_URL').replace(':80', '')
+const BACKEND_URL = Cypress.env('BACKEND_URL').replace(':443', '')
 describe('Add snippet tests', () => {
 
   beforeEach(() => {

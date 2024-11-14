@@ -15,7 +15,7 @@ describe('Add snippet tests', () => {
   it('Can add snippets manually', () => {
     cy.visit("/")
     const backendUrl = Cypress.env("BACKEND_URL")
-    const url = backendUrl.replace(':80', "") + "/snippet"
+    const url = backendUrl.replace(':443', "") + "/snippet"
     cy.intercept('POST', url, (req) => {
       req.reply((res) => {
         req.headers = {'Authorization': `Bearer ${localStorage.getItem("authAccessToken")}`}
@@ -40,7 +40,7 @@ describe('Add snippet tests', () => {
 
   it('Can add snippets via file', () => {
     cy.visit("/")
-    cy.intercept('POST', Cypress.env("BACKEND_URL").replace(':80','')+"/snippet", (req) => {
+    cy.intercept('POST', Cypress.env("BACKEND_URL").replace(':443','')+"/snippet", (req) => {
       req.headers = {'Authorization': `Bearer ${localStorage.getItem('authAccessToken')}`}
       req.reply((res) => {
         expect(res.statusCode).to.eq(201);
@@ -49,7 +49,7 @@ describe('Add snippet tests', () => {
 
 
     /* ==== Generated with Cypress Studio ==== */
-    const backendUrl = Cypress.env("BACKEND_URL").replace(':80', "")
+    const backendUrl = Cypress.env("BACKEND_URL").replace(':443', "")
     // Wait for snippets to load
     const url = backendUrl + "/user/snippets?isOwner=true&isShared=false?name=?pageNumber=0?pageSize=10"
 
