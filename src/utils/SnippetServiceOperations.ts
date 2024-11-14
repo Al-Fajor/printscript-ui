@@ -83,7 +83,8 @@ export class SnippetServiceOperations implements SnippetOperations {
         // Extend this for all languages we're going to support
         const fileTypes: FileType[] = [
             { language : 'Python', extension: 'py' },
-            { language: 'Printscript', extension: 'ps' },
+            { language: 'Printscript/1.0', extension: 'ps' },
+            { language: 'Printscript/1.1', extension: 'ps' },
             { language: 'Go', extension: 'go' },
             { language: 'Java', extension: 'java' },
             { language: 'JavaScript', extension: 'js' },
@@ -133,7 +134,7 @@ export class SnippetServiceOperations implements SnippetOperations {
 
         const getExtension = async (language: string): Promise<string> => {
             const fileTypes = await this.getFileTypes()
-            return Promise.resolve(fileTypes.find((f) => f.language === language)?.extension!)
+            return Promise.resolve(fileTypes.find((f) => f.language.split("/")[0] === language)?.extension!)
         }
 
         try {
@@ -303,7 +304,6 @@ export class SnippetServiceOperations implements SnippetOperations {
                     inputs: testCase.input,
                     expectedOutput: testCase.output,
                     name: testCase.name,
-                    version: "1.1"
                 }, {
                     headers: {
                         'Authorization': `Bearer ${await this.token}`
@@ -406,20 +406,22 @@ export class SnippetServiceOperations implements SnippetOperations {
         const url = `${process.env.BACKEND_URL}/snippet/${id}`;
         const snippet = await this.getSnippetById(id)
         if (!snippet) return Promise.resolve({} as Snippet)
-        // TODO: fix backend endpoints
+
+        const formData = new FormData();
+        formData.append('id', id);
+        const file = new Blob([updateSnippet.content], { type: 'text/plain' });
+        formData.append('file', file, 'snippet.txt');
+
         try {
-            const response = await axios.put(url, {
-                    id,
-                    language: snippet.language,
-                    content: updateSnippet.content
-            }, {
+            const response = await axios.put(url, formData, {
                 headers: {
                     'Authorization': `Bearer ${await this.token}`,
+                    'Content-Type': 'multipart/form-data',
                 },
             });
             return response.data;
         } catch (error) {
-            console.error('Failed to create snippet:', error);
+            console.error('Failed to update snippet:', error);
             return Promise.resolve({} as Snippet);
         }
     }

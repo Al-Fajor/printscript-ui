@@ -20,7 +20,7 @@ describe('Add snippet tests', () => {
     cy.wait("@getSnippets")
 
     cy.get('body').click(0, 0)
-    // cy.wait(2000) // TODO comment this line and uncomment 19 to wait for the real data
+    cy.wait(2000)
     cy.get('.MuiTableBody-root > :nth-child(1) > :nth-child(1)').click();
   })
 

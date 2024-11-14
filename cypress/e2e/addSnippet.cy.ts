@@ -30,7 +30,7 @@ describe('Add snippet tests', () => {
     cy.get('#name').type('Some snippet name');
     cy.get('#demo-simple-select').click()
     cy.get('body').click();
-    cy.get('[data-testid="menu-option-Printscript"]').click()
+    cy.get('[data-testid="menu-option-Printscript/1.1"]').click()
 
     cy.get('[data-testid="add-snippet-code-editor"]').click();
     cy.get('[data-testid="add-snippet-code-editor"]').type(`const snippet: string = "some snippet"; \n println(snippet);`);
