@@ -64,7 +64,7 @@ describe('Home', () => {
     cy.get('#name').type(snippetData.name);
     cy.get('#demo-simple-select').click()
     cy.get('body').click();
-    cy.get(`[data-testid="menu-option-${snippetData.language}"]`).click()
+    cy.get(`[data-testid="menu-option-${snippetData.language}/1.1"]`).click()
 
     cy.get('[data-testid="add-snippet-code-editor"]').click();
     cy.get('[data-testid="add-snippet-code-editor"]').type(snippetData.content);
