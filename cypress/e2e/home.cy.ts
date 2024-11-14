@@ -13,7 +13,7 @@ describe('Home', () => {
   })
   before(() => {
     process.env.FRONTEND_URL = Cypress.env("FRONTEND_URL");
-    process.env.BACKEND_URL = Cypress.env("BACKEND_URL");
+    process.env.BACKEND_URL = Cypress.env("BACKEND_URL").replace(":443", '');
   })
 
   it('Renders home', () => {
@@ -37,11 +37,10 @@ describe('Home', () => {
     }
 
 
-    const backendUrl = Cypress.env("BACKEND_URL").replace(':80', "")
+    const backendUrl = Cypress.env("BACKEND_URL").replace(':443', "")
     const postUrl = backendUrl + "/snippet"
     // Wait for snippets to load
     const url = backendUrl + "/user/snippets?isOwner=true&isShared=false?name=?pageNumber=0?pageSize=10"
-
     cy.intercept('GET', url, (req) => {
       req.headers = {'Authorization': `Bearer ${localStorage.getItem("authAccessToken")}`}
       req.reply((res) => {
@@ -86,7 +85,7 @@ describe('Home', () => {
   it('Renders the first snippets', () => {
     cy.visit(Cypress.env("FRONTEND_URL"))
 
-    const backendUrl = Cypress.env('BACKEND_URL').replace(':80', '')
+    const backendUrl = Cypress.env('BACKEND_URL').replace(':443', '')
     const url = backendUrl + "/user/snippets?isOwner=true&isShared=false?name=?pageNumber=0?pageSize=10"
     cy.intercept('GET', url, (req) => {
       req.headers = {'Authorization': `Bearer ${localStorage.getItem("authAccessToken")}`}
