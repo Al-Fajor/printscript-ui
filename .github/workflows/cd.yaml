@@ -32,3 +32,18 @@
            push: true
            tags: |
              ghcr.io/al-fajor/ui:latest
+
+       - name: Setup SSH Agent
+         uses: webfactory/ssh-agent@v0.5.4
+         with:
+           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+       - name: SSH into Server and Deploy
+         run: |
+           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
+           "cd ${{ secrets.WORK_DIR }} && \
+           git pull && \
+           sudo docker-compose stop ui && \
+           sudo docker-compose rm -f ui && \
+           sudo docker-compose pull ui && \
+           sudo docker-compose up -d ui"
