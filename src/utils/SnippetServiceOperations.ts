@@ -46,7 +46,6 @@ export class SnippetServiceOperations implements SnippetOperations {
                     'Authorization': `Bearer ${await this.token}`,
                 }
             })
-            console.log('Snippet deleted successfully');
             return 'Snippet deleted successfully';
         } catch (error) {
             console.error('Failed to delete snippet:', error);
@@ -74,7 +73,7 @@ export class SnippetServiceOperations implements SnippetOperations {
             }
             return response.data
         } catch (error) {
-            console.log('Failed to format snippet:', error);
+            console.error('Failed to format snippet:', error);
             return Promise.resolve(snippet);
         }
     }
@@ -123,7 +122,7 @@ export class SnippetServiceOperations implements SnippetOperations {
                 value: rule. value
             }))
         } catch (error) {
-            console.log('Failed to get rules:', error);
+            console.error('Failed to get rules:', error);
             return Promise.resolve([]);
         }
     }
@@ -158,7 +157,7 @@ export class SnippetServiceOperations implements SnippetOperations {
                 author: response.data.author
             };
         } catch (error) {
-            console.log('Failed to get snippet:', error);
+            console.error('Failed to get snippet:', error);
             return Promise.resolve(undefined);
         }
     }
@@ -200,14 +199,10 @@ export class SnippetServiceOperations implements SnippetOperations {
             }
         })
 
-        console.log(response.data)
-
         const usersFromBackend: User[] = response.data.snippets.map((user: { userId: string, name: string }) => ({ // Prop name is incorrect
             id: user.userId,
             name: user.name
         }));
-
-        console.log("Users from backend: ", usersFromBackend)
 
         const users: PaginatedUsers = {users: usersFromBackend, page: response.data.pageNumber, count: response.data.count, page_size: response.data.pageSize};
         return Promise.resolve(users);
@@ -288,7 +283,7 @@ export class SnippetServiceOperations implements SnippetOperations {
 
             return newRules
         } catch (error) {
-            console.log('Failed to get rules:', error);
+            console.error('Failed to get rules:', error);
             return Promise.resolve([]);
         }
     }

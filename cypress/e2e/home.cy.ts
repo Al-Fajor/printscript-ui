@@ -2,6 +2,10 @@
 import {CreateSnippet} from "../../src/utils/snippet";
 
 describe('Home', () => {
+  before(() => {
+    process.env.FRONTEND_URL = Cypress.env("FRONTEND_URL");
+    process.env.BACKEND_URL = Cypress.env("BACKEND_URL").replace(":443", '');
+  })
   beforeEach(() => {
     cy.on('uncaught:exception', () => {
       return false
@@ -10,10 +14,6 @@ describe('Home', () => {
         Cypress.env("AUTH0_USERNAME"),
         Cypress.env("AUTH0_PASSWORD")
     )
-  })
-  before(() => {
-    process.env.FRONTEND_URL = Cypress.env("FRONTEND_URL");
-    process.env.BACKEND_URL = Cypress.env("BACKEND_URL").replace(":443", '');
   })
 
   it('Renders home', () => {
