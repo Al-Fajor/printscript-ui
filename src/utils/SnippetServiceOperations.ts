@@ -8,7 +8,6 @@ import {TestCaseResult} from "./queries.tsx";
 import {SnippetAdapter} from "./snippetAdapter.ts";
 import axios from "axios";
 import {ApiRule} from "./apiTypes.ts";
-import {BACKEND_URL} from "./constants.ts";
 
 export class SnippetServiceOperations implements SnippetOperations {
     private token: Promise<string>
@@ -56,7 +55,7 @@ export class SnippetServiceOperations implements SnippetOperations {
     async formatSnippet(snippet: string): Promise<string> {
         console.log('formatSnippet called with snippet:', snippet);
 
-        const url = `${BACKEND_URL}/action/format`;
+        const url = `${process.env.BACKEND_URL}/action/format`;
 
         try {
             const response = await axios.post(url, null, {
@@ -103,7 +102,7 @@ export class SnippetServiceOperations implements SnippetOperations {
     }
 
     async getRules(action: 'LINT' | 'FORMAT'): Promise<Rule[]> {
-        const url = `${BACKEND_URL}/action/rules`;
+        const url = `${process.env.BACKEND_URL}/action/rules`;
 
         try {
             const response = await axios.get(url, {
@@ -268,7 +267,7 @@ export class SnippetServiceOperations implements SnippetOperations {
     }
 
     async modifyRule(newRules: Rule[], action: 'LINT' | 'FORMAT'): Promise<Rule[]> {
-        const url = `${BACKEND_URL}/action/rules`;
+        const url = `${process.env.BACKEND_URL}/action/rules`;
 
         try {
             const response = await axios.put(
