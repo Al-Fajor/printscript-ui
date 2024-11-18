@@ -361,11 +361,23 @@ export class SnippetServiceOperations implements SnippetOperations {
         return this.getSnippetById(snippetId) as Promise<Snippet>;
     }
 
-    async testSnippet(testCase: Partial<TestCase>): Promise<TestCaseResult> {
+    async testSnippet(testCase: Partial<TestCase>, snippetId: string): Promise<TestCaseResult> {
         console.log('testSnippet called with testCase:', testCase);
         try {
-            const url = `${process.env.BACKEND_URL}/snippet/test/${testCase.id!}/get-results`;
-            const testResult = await axios.get(url, {
+            const testUrl = testCase.id ? `snippet/test/${testCase.id!}` : `snippet/${snippetId}/test`
+            const url = `${process.env.BACKEND_URL}/${testUrl}/get-results`;
+
+            const testResult = testCase.id ? await axios.get(url, {
+                headers: {
+                    'Authorization': `Bearer ${await this.token}`
+                }
+            }) : await axios.post(url,
+                {
+                    name: testCase.name,
+                    inputs:testCase.input,
+                    expectedOutput: testCase.output
+                },
+                {
                 headers: {
                     'Authorization': `Bearer ${await this.token}`
                 }
