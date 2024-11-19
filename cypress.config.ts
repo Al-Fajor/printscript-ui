@@ -10,7 +10,7 @@ export default defineConfig({
       return config
     },
     experimentalStudio: true,
-    baseUrl: process.env.FRONTEND_URL,
+    baseUrl: process.env.FRONTEND_URL ?? "__FRONTEND_URL__",
     chromeWebSecurity: false //?
   },
 });
