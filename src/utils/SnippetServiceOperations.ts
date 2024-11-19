@@ -9,6 +9,8 @@ import {SnippetAdapter} from "./snippetAdapter.ts";
 import axios from "axios";
 import {ApiRule} from "./apiTypes.ts";
 
+const BACKEND_URL = process.env.BACKEND_URL ?? "__BACKEND_URL__";
+
 export class SnippetServiceOperations implements SnippetOperations {
     private token: Promise<string>
 
@@ -18,7 +20,7 @@ export class SnippetServiceOperations implements SnippetOperations {
 
 
     async createSnippet(createSnippet: CreateSnippet): Promise<Snippet> {
-        const url = `${process.env.BACKEND_URL}/snippet`;
+        const url = `${BACKEND_URL}/snippet`;
         const adapter = new SnippetAdapter();
         const formData = adapter.createSnippet(createSnippet);
 
@@ -38,7 +40,7 @@ export class SnippetServiceOperations implements SnippetOperations {
 
     async deleteSnippet(id: string): Promise<string> {
         console.log('deleteSnippet called with id:', id);
-        const url = `${process.env.BACKEND_URL}/snippet/${id}`;
+        const url = `${BACKEND_URL}/snippet/${id}`;
         try {
             await axios.delete(url,{
                 headers: {
@@ -55,7 +57,7 @@ export class SnippetServiceOperations implements SnippetOperations {
     async formatSnippet(snippet: string): Promise<string> {
         console.log('formatSnippet called with snippet:', snippet);
 
-        const url = `${process.env.BACKEND_URL}/action/format`;
+        const url = `${BACKEND_URL}/action/format`;
 
         try {
             const response = await axios.post(url, null, {
@@ -102,7 +104,7 @@ export class SnippetServiceOperations implements SnippetOperations {
     }
 
     async getRules(action: 'LINT' | 'FORMAT'): Promise<Rule[]> {
-        const url = `${process.env.BACKEND_URL}/action/rules`;
+        const url = `${BACKEND_URL}/action/rules`;
 
         try {
             const response = await axios.get(url, {
@@ -128,7 +130,7 @@ export class SnippetServiceOperations implements SnippetOperations {
 
     async getSnippetById(id: string): Promise<Snippet | undefined> {
         console.log('getSnippetById called with id:', id);
-        const url = `${process.env.BACKEND_URL}/snippet/${id}`;
+        const url = `${BACKEND_URL}/snippet/${id}`;
 
         const getExtension = async (language: string): Promise<string> => {
             const fileTypes = await this.getFileTypes()
@@ -162,7 +164,7 @@ export class SnippetServiceOperations implements SnippetOperations {
     }
 
     async getTestCases(snippetId: string): Promise<TestCase[]> {
-        const response = await axios.get(`${process.env.BACKEND_URL}/snippet/${snippetId}/test/all`, {
+        const response = await axios.get(`${BACKEND_URL}/snippet/${snippetId}/test/all`, {
             headers: {
                 Authorization: `Bearer ${await this.token}`
             }
@@ -187,7 +189,7 @@ export class SnippetServiceOperations implements SnippetOperations {
     async getUserFriends(name?: string, page?: number, pageSize?: number): Promise<PaginatedUsers> {
         console.log('getUserFriends called with name:', name, 'page:', page, 'pageSize:', pageSize);
         // Only need to send userId and name
-        const response= await axios.get(`${process.env.BACKEND_URL}/user-data/users`, {
+        const response= await axios.get(`${BACKEND_URL}/user-data/users`, {
             params: {
                 name,
                 pageNumber: page,
@@ -209,7 +211,7 @@ export class SnippetServiceOperations implements SnippetOperations {
 
     async listSnippetDescriptors(page: number, pageSize: number, snippetName?: string): Promise<PaginatedSnippets> {
         console.log('listSnippetDescriptors called with page:', page, 'pageSize:', pageSize, 'snippetName:', snippetName);
-        const ownedSnippets= await axios.get(`${process.env.BACKEND_URL}/user/snippets`, {
+        const ownedSnippets= await axios.get(`${BACKEND_URL}/user/snippets`, {
             params: {
                 isOwner: true,
                 isShared: false,
@@ -234,7 +236,7 @@ export class SnippetServiceOperations implements SnippetOperations {
             } as Snippet
         }
 
-        const sharedSnippets= await axios.get(`${process.env.BACKEND_URL}/user/snippets`, {
+        const sharedSnippets= await axios.get(`${BACKEND_URL}/user/snippets`, {
             params: {
                 isOwner: false,
                 isShared: true,
@@ -267,7 +269,7 @@ export class SnippetServiceOperations implements SnippetOperations {
     }
 
     async modifyRule(newRules: Rule[], action: 'LINT' | 'FORMAT'): Promise<Rule[]> {
-        const url = `${process.env.BACKEND_URL}/action/rules`;
+        const url = `${BACKEND_URL}/action/rules`;
 
         try {
             const response = await axios.put(
@@ -290,7 +292,7 @@ export class SnippetServiceOperations implements SnippetOperations {
         console.log('postTestCase called with testCase:', testCase);
         const emptyTestCase = Promise.resolve({} as TestCase)
          //This only saves the test, we need the update case
-        const url = `${process.env.BACKEND_URL}/snippet/test/`;
+        const url = `${BACKEND_URL}/snippet/test/`;
         let response;
         try {
             if (!testCase.id) {
@@ -335,7 +337,7 @@ export class SnippetServiceOperations implements SnippetOperations {
 
     async removeTestCase(id: string): Promise<string> {
         console.log('removeTestCase called with id:', id);
-        const url = `${process.env.BACKEND_URL}/snippet/test/${id}`;
+        const url = `${BACKEND_URL}/snippet/test/${id}`;
         const response = await axios.delete(url, {
             headers: {
                 'Authorization': `Bearer ${await this.token}`
@@ -348,7 +350,7 @@ export class SnippetServiceOperations implements SnippetOperations {
 
     async shareSnippet(snippetId: string, userId: string): Promise<Snippet> {
         console.log('shareSnippet called with snippetId:', snippetId, 'userId:', userId);
-        const url = `${process.env.BACKEND_URL}/snippet/${snippetId}/share`;
+        const url = `${BACKEND_URL}/snippet/${snippetId}/share`;
         // Create permission, share to this user
         await axios.post(url,
             {userId: userId},{
@@ -363,7 +365,7 @@ export class SnippetServiceOperations implements SnippetOperations {
     async testSnippet(testCase: Partial<TestCase>): Promise<TestCaseResult> {
         console.log('testSnippet called with testCase:', testCase);
         try {
-            const url = `${process.env.BACKEND_URL}/snippet/test/${testCase.id!}/get-results`;
+            const url = `${BACKEND_URL}/snippet/test/${testCase.id!}/get-results`;
             const testResult = await axios.get(url, {
                 headers: {
                     'Authorization': `Bearer ${await this.token}`
@@ -397,7 +399,7 @@ export class SnippetServiceOperations implements SnippetOperations {
     async updateSnippetById(id: string, updateSnippet: UpdateSnippet): Promise<Snippet> {
         console.log('updateSnippetById called with id:', id, 'updateSnippet:', updateSnippet);
 
-        const url = `${process.env.BACKEND_URL}/snippet/${id}`;
+        const url = `${BACKEND_URL}/snippet/${id}`;
         const snippet = await this.getSnippetById(id)
         if (!snippet) return Promise.resolve({} as Snippet)
 
