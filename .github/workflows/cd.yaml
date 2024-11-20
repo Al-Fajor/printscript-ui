@@ -36,12 +36,12 @@
        - name: Setup SSH Agent
          uses: webfactory/ssh-agent@v0.5.4
          with:
-           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+           ssh-private-key: ${{ secrets.SSH_PROD_PRIVATE_KEY }}
 
        - name: SSH into Server and Deploy
          run: |
-           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
-           "cd ${{ secrets.WORK_DIR }} && \
+           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_PROD_USER }}@${{ secrets.SSH_PROD_HOST }} \
+           "cd ${{ secrets.WORK_PROD_DIR }} && \
            git pull && \
            sudo docker-compose stop ui && \
            sudo docker-compose rm -f ui && \
