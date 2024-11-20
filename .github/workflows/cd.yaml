@@ -41,7 +41,7 @@
        - name: SSH into Server and Deploy
          run: |
            ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_PROD_USER }}@${{ secrets.SSH_PROD_HOST }} \
-           "cd ${{ secrets.WORK_PROD_DIR }} && \
+           "cd ${{ secrets.SSH_PROD_WORK_DIR }} && \
            git pull && \
            sudo docker-compose stop ui && \
            sudo docker-compose rm -f ui && \
